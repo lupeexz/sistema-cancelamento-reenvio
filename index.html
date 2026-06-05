@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sistema de Cancelamento e Reenvio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="loginScreen" class="card login-card">
+      <p class="eyebrow">Acesso restrito</p>
+      <h1>Cancelamento / Reenvio</h1>
+      <p class="muted">Digite a senha para acessar o formulário e o dashboard.</p>
+
+      <form id="loginForm" class="form-grid">
+        <label>
+          Senha
+          <input id="passwordInput" type="password" required autocomplete="current-password" />
+        </label>
+        <button type="submit">Entrar</button>
+        <p id="loginError" class="error hidden">Senha incorreta.</p>
+      </form>
+    </section>
+
+    <section id="systemScreen" class="hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Controle interno</p>
+          <h1>Cancelamento / Reenvio</h1>
+          <p class="muted">Os registros são enviados para abas separadas na Google Sheets.</p>
+        </div>
+        <button id="logoutBtn" class="secondary">Sair</button>
+      </header>
+
+      <section class="grid two">
+        <form id="entryForm" class="card form-grid">
+          <h2>Novo registro</h2>
+
+          <label>
+            Tipo
+            <select id="tipo" name="tipo" required>
+              <option value="Cancelamento">Cancelamento</option>
+              <option value="Reenvio">Reenvio</option>
+            </select>
+          </label>
+
+          <label>
+            Loja
+            <input id="loja" name="loja" type="text" required maxlength="120" />
+          </label>
+
+          <label>
+            Data Pedido
+            <input id="dataPedido" name="dataPedido" type="date" required />
+          </label>
+
+          <label>
+            Motivo
+            <input id="motivo" name="motivo" type="text" required maxlength="180" />
+          </label>
+
+          <label>
+            Fretes / Estorno
+            <input id="fretesEstorno" name="fretesEstorno" type="text" maxlength="120" placeholder="Ex.: R$ 25,90 / Estorno aprovado" />
+          </label>
+
+          <label>
+            Número do Pedido
+            <input id="numeroPedido" name="numeroPedido" type="text" required maxlength="80" />
+          </label>
+
+          <label>
+            WhatsApp
+            <input id="whatsapp" name="whatsapp" type="tel" required maxlength="30" placeholder="Ex.: 11999999999" />
+          </label>
+
+          <label>
+            Novo Código de Rastreio
+            <input id="novoCodigoRastreio" name="novoCodigoRastreio" type="text" maxlength="80" placeholder="Obrigatório para Reenvio" />
+          </label>
+
+          <label>
+            Data Reenvio
+            <input id="dataReenvio" name="dataReenvio" type="date" />
+          </label>
+
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" class="honeypot" />
+
+          <button id="submitBtn" type="submit">Salvar na planilha</button>
+          <p id="formMessage" class="message"></p>
+        </form>
+
+        <aside class="card">
+          <h2>Resumo</h2>
+          <div class="stats">
+            <div>
+              <span id="statCancelamento">0</span>
+              <small>Cancelamentos</small>
+            </div>
+            <div>
+              <span id="statReenvio">0</span>
+              <small>Reenvios</small>
+            </div>
+            <div>
+              <span id="statTotal">0</span>
+              <small>Total filtrado</small>
+            </div>
+          </div>
+          <button id="refreshBtn" class="secondary full">Atualizar dashboard</button>
+          <p class="muted small">Os dados vêm das abas “Cancelamento” e “Reenvio” da planilha.</p>
+        </aside>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Dashboard</h2>
+          <div class="filters">
+            <label>
+              Visualizar
+              <select id="filterMode">
+                <option value="all">Todos</option>
+                <option value="day">Dia específico</option>
+                <option value="month">Mês</option>
+              </select>
+            </label>
+            <label id="filterDateWrap" class="hidden">
+              Data
+              <input id="filterDate" type="date" />
+            </label>
+            <label id="filterMonthWrap" class="hidden">
+              Mês
+              <input id="filterMonth" type="month" />
+            </label>
+            <label>
+              Tipo
+              <select id="filterType">
+                <option value="all">Todos</option>
+                <option value="Cancelamento">Cancelamento</option>
+                <option value="Reenvio">Reenvio</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Registros por tipo</h3>
+            <canvas id="chartTipo" width="420" height="260"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Top lojas</h3>
+            <canvas id="chartLojas" width="420" height="260"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Top motivos</h3>
+            <canvas id="chartMotivos" width="420" height="260"></canvas>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Loja</th>
+                <th>Data Pedido</th>
+                <th>Motivo</th>
+                <th>Fretes / Estorno</th>
+                <th>Número Pedido</th>
+                <th>WhatsApp</th>
+                <th>Novo Código Rastreio</th>
+                <th>Data Reenvio</th>
+                <th>Criado em</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr><td colspan="10">Nenhum dado carregado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
