@@ -40,11 +40,7 @@ Cancelamento
 Reenvio
 ```
 
-## Senha inicial do site
 
-```txt
-9T4yQTv-PtHR96KQ
-```
 
 Você pode trocar a senha gerando um novo SHA-256 e substituindo `PASSWORD_SHA256` no arquivo `config.js`.
 
