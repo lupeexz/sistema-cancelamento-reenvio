@@ -3,39 +3,50 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema de Cancelamento e Reenvio</title>
+  <title>Novo registro | Cancelamento e Reenvio</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="app">
-    <section id="loginScreen" class="card login-card">
-      <p class="eyebrow">Acesso restrito</p>
-      <h1>Cancelamento / Reenvio</h1>
-      <p class="muted">Digite a senha para acessar o formulário e o dashboard.</p>
+    <section id="loginScreen" class="auth-shell">
+      <div class="auth-card">
+        <div class="brand-mark">CR</div>
+        <p class="eyebrow">Acesso restrito</p>
+        <h1>Sistema de Cancelamento e Reenvio</h1>
+        <p class="muted">Digite a senha para acessar o formulário interno.</p>
 
-      <form id="loginForm" class="form-grid">
-        <label>
-          Senha
-          <input id="passwordInput" type="password" required autocomplete="current-password" />
-        </label>
-        <button type="submit">Entrar</button>
-        <p id="loginError" class="error hidden">Senha incorreta.</p>
-      </form>
+        <form id="loginForm" class="form-stack">
+          <label>
+            Senha
+            <input id="passwordInput" type="password" required autocomplete="current-password" placeholder="Digite sua senha" />
+          </label>
+          <button type="submit">Entrar no sistema</button>
+          <p id="loginError" class="error hidden">Senha incorreta.</p>
+        </form>
+      </div>
     </section>
 
     <section id="systemScreen" class="hidden">
-      <header class="topbar">
+      <header class="hero">
         <div>
           <p class="eyebrow">Controle interno</p>
-          <h1>Cancelamento / Reenvio</h1>
-          <p class="muted">Os registros são enviados para abas separadas na Google Sheets.</p>
+          <h1>Reenvios/estornos</h1>
         </div>
-        <button id="logoutBtn" class="secondary">Sair</button>
+
+        <nav class="nav-actions">
+          <a class="secondary link-button" href="dashboard.html">Abrir dashboard</a>
+          <button id="logoutBtn" class="ghost">Sair</button>
+        </nav>
       </header>
 
-      <section class="grid two">
-        <form id="entryForm" class="card form-grid">
-          <h2>Novo registro</h2>
+      <section class="layout-form">
+        <form id="entryForm" class="panel form-grid">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Cadastro</p>
+              <h2>Informações do pedido</h2>
+            </div>
+          </div>
 
           <label>
             Tipo
@@ -47,7 +58,7 @@
 
           <label>
             Loja
-            <input id="loja" name="loja" type="text" required maxlength="120" />
+            <input id="loja" name="loja" type="text" required maxlength="120" placeholder="Ex.: Loja Centro" />
           </label>
 
           <label>
@@ -57,22 +68,22 @@
 
           <label>
             Motivo
-            <input id="motivo" name="motivo" type="text" required maxlength="180" />
+            <input id="motivo" name="motivo" type="text" required maxlength="180" placeholder="Ex.: Cliente não retirou o pedido" />
           </label>
 
           <label>
             Fretes / Estorno
-            <input id="fretesEstorno" name="fretesEstorno" type="text" maxlength="120" placeholder="Ex.: R$ 25,90 / Estorno aprovado" />
+            <input id="fretesEstorno" name="fretesEstorno" type="text" maxlength="120" placeholder="Ex.: 24,90" />
           </label>
 
           <label>
             Número do Pedido
-            <input id="numeroPedido" name="numeroPedido" type="text" required maxlength="80" />
+            <input id="numeroPedido" name="numeroPedido" type="text" required maxlength="80" placeholder="Ex.: 78945612330" />
           </label>
 
           <label>
             WhatsApp
-            <input id="whatsapp" name="whatsapp" type="tel" required maxlength="30" placeholder="Ex.: 11999999999" />
+            <input id="whatsapp" name="whatsapp" type="tel" required maxlength="30" placeholder="Ex.: 15997246236" />
           </label>
 
           <label>
@@ -87,103 +98,28 @@
 
           <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" class="honeypot" />
 
-          <button id="submitBtn" type="submit">Salvar na planilha</button>
-          <p id="formMessage" class="message"></p>
+          <div class="form-footer">
+            <button id="submitBtn" type="submit">Salvar na planilha</button>
+            <p id="formMessage" class="message"></p>
+          </div>
         </form>
 
-        <aside class="card">
-          <h2>Resumo</h2>
-          <div class="stats">
-            <div>
-              <span id="statCancelamento">0</span>
-              <small>Cancelamentos</small>
-            </div>
-            <div>
-              <span id="statReenvio">0</span>
-              <small>Reenvios</small>
-            </div>
-            <div>
-              <span id="statTotal">0</span>
-              <small>Total filtrado</small>
-            </div>
+        <aside class="panel side-panel">
+          <p class="eyebrow">Atalho</p>
+          <h2>Visualização separada</h2>
+          <p class="muted">O dashboard agora fica em outra página para deixar o cadastro mais leve e rápido.</p>
+          <a class="link-button full" href="dashboard.html">Ver dashboard</a>
+
+          <div class="tips">
+            <strong>Segurança ativa</strong>
+            <span>Senha local + token no Apps Script + planilha privada.</span>
           </div>
-          <button id="refreshBtn" class="secondary full">Atualizar dashboard</button>
-          <p class="muted small">Os dados vêm das abas “Cancelamento” e “Reenvio” da planilha.</p>
         </aside>
-      </section>
-
-      <section class="card">
-        <div class="section-head">
-          <h2>Dashboard</h2>
-          <div class="filters">
-            <label>
-              Visualizar
-              <select id="filterMode">
-                <option value="all">Todos</option>
-                <option value="day">Dia específico</option>
-                <option value="month">Mês</option>
-              </select>
-            </label>
-            <label id="filterDateWrap" class="hidden">
-              Data
-              <input id="filterDate" type="date" />
-            </label>
-            <label id="filterMonthWrap" class="hidden">
-              Mês
-              <input id="filterMonth" type="month" />
-            </label>
-            <label>
-              Tipo
-              <select id="filterType">
-                <option value="all">Todos</option>
-                <option value="Cancelamento">Cancelamento</option>
-                <option value="Reenvio">Reenvio</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>Registros por tipo</h3>
-            <canvas id="chartTipo" width="420" height="260"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>Top lojas</h3>
-            <canvas id="chartLojas" width="420" height="260"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>Top motivos</h3>
-            <canvas id="chartMotivos" width="420" height="260"></canvas>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Loja</th>
-                <th>Data Pedido</th>
-                <th>Motivo</th>
-                <th>Fretes / Estorno</th>
-                <th>Número Pedido</th>
-                <th>WhatsApp</th>
-                <th>Novo Código Rastreio</th>
-                <th>Data Reenvio</th>
-                <th>Criado em</th>
-              </tr>
-            </thead>
-            <tbody id="recordsBody">
-              <tr><td colspan="10">Nenhum dado carregado.</td></tr>
-            </tbody>
-          </table>
-        </div>
       </section>
     </section>
   </main>
 
   <script src="config.js"></script>
-  <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

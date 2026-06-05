@@ -1,4 +1,5 @@
-// Copie a URL do Web App do Google Apps Script depois do deploy.
+// Cole aqui a URL do Web App do Google Apps Script depois do deploy.
+// Importante: a URL precisa terminar com /exec
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyi1SB9CAVt1aercHP6QD1Hien_3stkC8lV8HaCwLQk5dvs8p4aGFK7lWXtiIWT26QV/exec",
   FORM_TOKEN: "L4BRZxALPI3G8txFktdNYNy3RxV3p3QqnzuCLT7PKwc",

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard | Cancelamento e Reenvio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="loginScreen" class="auth-shell">
+      <div class="auth-card">
+        <div class="brand-mark">CR</div>
+        <p class="eyebrow">Dashboard protegido</p>
+        <h1>Acessar dashboard</h1>
+        <p class="muted">Digite a senha para visualizar os registros e gráficos.</p>
+
+        <form id="loginForm" class="form-stack">
+          <label>
+            Senha
+            <input id="passwordInput" type="password" required autocomplete="current-password" placeholder="Digite sua senha" />
+          </label>
+          <button type="submit">Entrar no dashboard</button>
+          <p id="loginError" class="error hidden">Senha incorreta.</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="systemScreen" class="hidden">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Análise</p>
+          <h1>Dashboard</h1>
+          <p class="muted">Resumo com filtros por tipo, dia e mês.</p>
+        </div>
+
+        <nav class="nav-actions">
+          <a class="secondary link-button" href="index.html">Novo registro</a>
+          <button id="refreshBtn" class="secondary">Atualizar</button>
+          <button id="logoutBtn" class="ghost">Sair</button>
+        </nav>
+      </header>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span id="statCancelamento">0</span>
+          <small>Cancelamentos</small>
+        </article>
+        <article class="stat-card">
+          <span id="statReenvio">0</span>
+          <small>Reenvios</small>
+        </article>
+        <article class="stat-card highlight">
+          <span id="statTotal">0</span>
+          <small>Total filtrado</small>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Filtros</p>
+            <h2>Visualização dos dados</h2>
+          </div>
+
+          <div class="filters">
+            <label>
+              Visualizar
+              <select id="filterMode">
+                <option value="all">Todos</option>
+                <option value="day">Por dia</option>
+                <option value="month">Por mês</option>
+              </select>
+            </label>
+
+            <label id="filterDateWrap" class="hidden">
+              Data
+              <input id="filterDate" type="date" />
+            </label>
+
+            <label id="filterMonthWrap" class="hidden">
+              Mês
+              <input id="filterMonth" type="month" />
+            </label>
+
+            <label>
+              Tipo
+              <select id="filterType">
+                <option value="all">Todos</option>
+                <option value="Cancelamento">Cancelamento</option>
+                <option value="Reenvio">Reenvio</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <article class="chart-card">
+            <h3>Registros por tipo</h3>
+            <canvas id="chartTipo" width="420" height="260"></canvas>
+          </article>
+          <article class="chart-card">
+            <h3>Top lojas</h3>
+            <canvas id="chartLojas" width="420" height="260"></canvas>
+          </article>
+          <article class="chart-card">
+            <h3>Top motivos</h3>
+            <canvas id="chartMotivos" width="420" height="260"></canvas>
+          </article>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Loja</th>
+                <th>Data Pedido</th>
+                <th>Motivo</th>
+                <th>Fretes / Estorno</th>
+                <th>Número Pedido</th>
+                <th>WhatsApp</th>
+                <th>Novo Código Rastreio</th>
+                <th>Data Reenvio</th>
+                <th>Criado em</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr><td colspan="10">Carregando dados...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
