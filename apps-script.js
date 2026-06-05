@@ -33,19 +33,12 @@ function doGet(e) {
     });
   }
 
-  return jsonResponse({
-    ok: true,
-    message: "Apps Script funcionando",
-  });
+  return jsonResponse({ ok: true, message: "Apps Script funcionando" });
 }
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-
-    if (data.website) {
-      return jsonResponse({ ok: false, error: "Envio bloqueado." });
-    }
 
     if (data.token !== FORM_TOKEN) {
       return jsonResponse({ ok: false, error: "Token inválido" });
@@ -73,16 +66,10 @@ function doPost(e) {
       data.novoCodigoRastreio || "",
     ]);
 
-    return jsonResponse({
-      ok: true,
-      message: "Registro salvo com sucesso",
-    });
+    return jsonResponse({ ok: true, message: "Registro salvo com sucesso" });
 
   } catch (error) {
-    return jsonResponse({
-      ok: false,
-      error: error.message,
-    });
+    return jsonResponse({ ok: false, error: error.message });
   }
 }
 
@@ -119,11 +106,7 @@ function getRecords() {
 
 function getOrCreateSheet(ss, name) {
   let sheet = ss.getSheetByName(name);
-
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-  }
-
+  if (!sheet) sheet = ss.insertSheet(name);
   return sheet;
 }
 
@@ -134,21 +117,17 @@ function ensureHeader(sheet) {
 
 function normalizeDate(value) {
   if (!value) return "";
-
   if (Object.prototype.toString.call(value) === "[object Date]") {
     return Utilities.formatDate(value, "GMT-3", "yyyy-MM-dd");
   }
-
   return String(value).slice(0, 10);
 }
 
 function normalizeDateTime(value) {
   if (!value) return "";
-
   if (Object.prototype.toString.call(value) === "[object Date]") {
     return value.toISOString();
   }
-
   return String(value);
 }
 
