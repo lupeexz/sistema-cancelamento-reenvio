@@ -1,1 +1,142 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Novo cadastro</title><link rel="stylesheet" href="style.css"/></head><body><main class="app"><section id="loginScreen" class="login"><form id="loginForm" class="login-card"><div class="logo">CR</div><p class="eyebrow">Acesso restrito</p><h1>Reenvios/estornos</h1><p class="muted">Digite a senha para acessar o sistema interno.</p><label class="field"><span>Senha</span><input id="passwordInput" type="password" required placeholder="Digite sua senha"/></label><button type="submit" style="width:100%">Entrar no sistema</button><p id="loginError" class="error hidden">Senha incorreta.</p></form></section><section id="systemScreen" class="shell hidden"><aside class="sidebar"><div class="brand"><div class="brand-badge">CR</div><div><strong>Controle interno</strong><small>Reenvios/estornos</small></div></div><nav class="nav"><a class="active" href="index.html">Novo cadastro</a><a href="dashboard.html">Dashboard</a><a href="registros.html">Registros efetuados</a></nav><div class="sidebar-footer"><button class="secondary" onclick="logout()">Sair</button></div></aside><section class="main"><div class="topbar"><div class="page-title"><p class="eyebrow">Cadastro</p><h1>Novo registro</h1><p class="muted">Os dados serão enviados para a aba correta da planilha.</p></div><a class="btn ghost" href="dashboard.html">Abrir dashboard</a></div><div class="grid two"><form id="entryForm" class="card form-grid"><label><span>Tipo</span><select id="tipo" required><option value="Cancelamento">Cancelamento</option><option value="Reenvio">Reenvio</option></select></label><label><span>Loja</span><input id="loja" required placeholder="Ex.: Loja Centro"/></label><label><span>Data Pedido</span><input id="dataPedido" type="date" required/></label><label><span>Motivo</span><input id="motivo" required placeholder="Ex.: Cliente não retirou o pedido"/></label><label><span>Fretes / Estorno</span><input id="fretesEstorno" placeholder="Ex.: 24,90"/></label><label><span>Número do Pedido</span><input id="numeroPedido" required placeholder="Ex.: 78945612330"/></label><label><span>WhatsApp</span><input id="whatsapp" required placeholder="Ex.: 15997246236"/></label><label><span>Novo Código de Rastreio</span><input id="novoCodigoRastreio" placeholder="Obrigatório para Reenvio"/></label><label><span>Data Reenvio</span><input id="dataReenvio" type="date"/></label><input id="website" class="hidden" autocomplete="off" tabindex="-1"/><div class="full"><button id="submitBtn" type="submit" style="width:100%">Salvar na planilha</button><p id="formMessage" class="message"></p></div></form><aside class="card"><p class="eyebrow">Atalho</p><h2>Área separada</h2><p class="muted">Use o menu lateral para acessar dashboard e registros já efetuados.</p><div class="stats"><div class="stat"><b id="statCancelamento">0</b><span>Cancelamentos</span></div><div class="stat"><b id="statReenvio">0</b><span>Reenvios</span></div><div class="stat"><b id="statTotal">0</b><span>Total</span></div></div><br><button class="secondary" onclick="loadMiniStats()" style="width:100%">Atualizar resumo</button></aside></div></section></section></main><script src="config.js"></script><script src="shared.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Novo cadastro</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<main class="app">
+
+  <!-- Login -->
+  <section id="loginScreen" class="login">
+    <form id="loginForm" class="login-card">
+      <div class="logo">CR</div>
+      <p class="eyebrow" style="margin-top:18px">Acesso restrito</p>
+      <h1>Reenvios/estornos</h1>
+      <p class="muted">Digite a senha para acessar o sistema interno.</p>
+      <label class="field">
+        <span>Senha</span>
+        <input id="passwordInput" type="password" required placeholder="Digite sua senha"/>
+      </label>
+      <button type="submit" style="width:100%;margin-top:16px">Entrar no sistema</button>
+      <p id="loginError" class="error hidden" style="margin-top:10px">Senha incorreta.</p>
+    </form>
+  </section>
+
+  <!-- Sistema -->
+  <section id="systemScreen" class="shell hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">CR</div>
+        <div>
+          <strong>Controle interno</strong>
+          <small>Reenvios/estornos</small>
+        </div>
+      </div>
+      <nav class="nav">
+        <a class="active" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Novo cadastro
+        </a>
+        <a href="dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="registros.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+          Registros efetuados
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="secondary" onclick="logout()" style="width:100%">Sair</button>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="topbar">
+        <div class="page-title">
+          <p class="eyebrow">Cadastro</p>
+          <h1>Novo registro</h1>
+          <p class="muted">Os dados serão enviados para a aba correta da planilha.</p>
+        </div>
+        <a href="dashboard.html"><button class="secondary">Abrir dashboard</button></a>
+      </div>
+
+      <div class="grid two">
+        <form id="entryForm" class="card form-grid">
+          <label class="field">
+            <span>Tipo</span>
+            <select id="tipo" required>
+              <option value="Cancelamento">Cancelamento</option>
+              <option value="Reenvio">Reenvio</option>
+              <option value="Reenvio Pagante">Reenvio Pagante</option>
+            </select>
+          </label>
+          <label class="field">
+  <span>Loja</span>
+  <select id="loja" required>
+    <option value="">Selecione a loja</option>
+            <option value="Barba Lenhador">Barba Lenhador</option>
+            <option value="Perito da Barba">Perito da Barba</option>
+            <option value="Barba Completa">Barba Completa</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Data Pedido</span>
+            <input id="dataPedido" type="date" required/>
+          </label>
+          <label class="field">
+            <span>Motivo</span>
+            <input id="motivo" required placeholder="Ex.: Cliente não retirou o pedido"/>
+          </label>
+          <label class="field">
+            <span>Fretes / Estorno</span>
+            <input id="fretesEstorno" placeholder="Ex.: 24,90"/>
+          </label>
+          <label class="field">
+            <span>Número do Pedido</span>
+            <input id="numeroPedido" required placeholder="Ex.: 78945612330"/>
+          </label>
+          <label class="field">
+            <span>WhatsApp</span>
+            <input id="whatsapp" required placeholder="Ex.: 15997246236"/>
+          </label>
+          <label class="field">
+            <span>Novo Código de Rastreio</span>
+            <input id="novoCodigoRastreio" placeholder="Obrigatório para Reenvio"/>
+          </label>
+          <label class="field">
+            <span>Data Reenvio</span>
+            <input id="dataReenvio" type="date"/>
+          </label>
+          <input id="website" class="hidden" autocomplete="off" tabindex="-1"/>
+          <div class="full">
+            <button id="submitBtn" type="submit" style="width:100%">Salvar na planilha</button>
+            <p id="formMessage" class="message"></p>
+          </div>
+        </form>
+
+        <aside class="card">
+          <p class="eyebrow">Resumo</p>
+          <h2>Situação atual</h2>
+          <p class="muted">Use o menu para acessar o dashboard e os registros já efetuados.</p>
+          <div class="stats">
+            <div class="stat"><b id="statCancelamento">0</b><span>Cancelamentos</span></div>
+            <div class="stat"><b id="statReenvio">0</b><span>Reenvios</span></div>
+            <div class="stat"><b id="statTotal">0</b><span>Total</span></div>
+          </div>
+          <br>
+          <button class="secondary" onclick="loadMiniStats()" style="width:100%">Atualizar resumo</button>
+        </aside>
+      </div>
+    </section>
+  </section>
+
+</main>
+<script src="config.js"></script>
+<script src="shared.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

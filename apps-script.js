@@ -4,6 +4,7 @@ const FORM_TOKEN = "L4BRZxALPI3G8txFktdNYNy3RxV3p3QqnzuCLT7PKwc";
 const SHEETS = {
   Cancelamento: "Cancelamento",
   Reenvio: "Reenvio",
+  "Reenvio Pagante": "Reenvio Pagante",
 };
 
 const HEADERS = [

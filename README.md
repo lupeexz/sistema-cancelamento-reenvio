@@ -1,29 +1,35 @@
-# Sistema Cancelamento/Reenvio - v5 rápido
+# Sistema Cancelamento/Reenvio — v6
 
-## O que mudou
+## O que mudou nesta versão
 
-- Cache local compartilhado entre Cadastro, Dashboard e Registros.
-- Dashboard carrega dados salvos imediatamente e atualiza manualmente pelo botão.
-- Cálculo de Fretes/Estornos corrigido para valores brasileiros como `24,90`, `108,94` e `1.234,56`.
-- Gráficos mais compactos.
-- Registros usam o mesmo cache para abrir mais rápido.
+- **Design refinado**: dark theme mais limpo, sem gradientes pesados, mais fácil de ler em uso prolongado.
+- **Sidebar com ícones SVG** inline em todas as páginas — sem dependências externas.
+- **Botões de ação** na sidebar com fundo e borda corrigidos (`secondary`).
+- **Tabela de registros** sem padding externo, header sticky na rolagem.
+- **Responsividade** revisada para tablets e celulares.
+- Toda a lógica JS permanece igual (config.js, shared.js, app.js, dashboard.js, registros.js).
+
+## Arquivos alterados
+
+| Arquivo | Mudança |
+|---|---|
+| `style.css` | Reescrito — mesmas variáveis, mais legível |
+| `index.html` | Ícones SVG na nav |
+| `dashboard.html` | Ícones SVG na nav |
+| `registros.html` | Ícones SVG na nav + card sem padding |
+
+## Arquivos inalterados
+
+`config.js`, `shared.js`, `app.js`, `dashboard.js`, `registros.js`, `apps-script.js`
 
 ## Como atualizar no GitHub
 
-Substitua os arquivos no repositório atual e rode:
-
 ```bash
 git add .
-git commit -m "V5 rapida com cache e calculo corrigido"
+git commit -m "v6 design refinado com icones e dark theme limpo"
 git push
 ```
 
 ## Apps Script
 
-Se seu Apps Script já está salvando/listando corretamente, não precisa trocar.
-Se quiser garantir, cole o arquivo `apps-script.js` no Google Apps Script e implante uma nova versão.
-
-
-## V5.1 Grid corrigido
-
-Esta versão ajusta o grid para deixar dashboard, cadastro e registros menos esticados e mais responsivos.
+Nenhuma alteração necessária. Se precisar reimplantar, use o arquivo `apps-script.js`.
