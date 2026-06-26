@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') doSearch();
   });
   // Atualiza links em tempo real ao mudar UTMs
-  ['utmCampaign','utmSource','utmMedium','utmContent','utmTerm'].forEach(id => {
+  ['utmCampaign','utmSource','utmMedium'].forEach(id => {
     document.getElementById(id).addEventListener('input',  () => { if (lastResults.length) renderResults(lastResults); });
     document.getElementById(id).addEventListener('change', () => { if (lastResults.length) renderResults(lastResults); });
   });
@@ -60,7 +60,7 @@ function searchLocal(query) {
     .map(p => ({ ...p, _score: score(p, query) }))
     .filter(p => p._score > 0)
     .sort((a, b) => b._score - a._score)
-    .slice(0, 3);
+    .slice(0, 6);
 
   return scored.map(p => ({
     nome:       p.nome,
@@ -76,24 +76,18 @@ function buildLink(baseUrl) {
   const campaign = document.getElementById('utmCampaign').value.trim();
   const source   = document.getElementById('utmSource').value.trim()   || 'reportana';
   const medium   = document.getElementById('utmMedium').value.trim()   || 'whatsapp';
-  const content  = document.getElementById('utmContent').value.trim();
-  const term     = document.getElementById('utmTerm').value.trim();
 
   try {
     const u = new URL(baseUrl.startsWith('http') ? baseUrl : 'https://' + baseUrl);
     u.searchParams.set('utm_source', source);
     u.searchParams.set('utm_medium', medium);
     if (campaign) u.searchParams.set('utm_campaign', campaign);
-    if (content)  u.searchParams.set('utm_content',  content);
-    if (term)     u.searchParams.set('utm_term',      term);
-    return { full: u.toString(), source, medium, campaign, content, term };
+    return { full: u.toString(), source, medium, campaign };
   } catch {
     const sep = baseUrl.includes('?') ? '&' : '?';
     let url = `${baseUrl}${sep}utm_source=${source}&utm_medium=${medium}`;
     if (campaign) url += `&utm_campaign=${campaign}`;
-    if (content)  url += `&utm_content=${content}`;
-    if (term)     url += `&utm_term=${term}`;
-    return { full: url, source, medium, campaign, content, term };
+    return { full: url, source, medium, campaign };
   }
 }
 
@@ -164,7 +158,7 @@ function renderResults(results) {
         <div class="lb-label">Link final com UTMs</div>
         <div class="lb-url">${escapeHtml(utm.full)}</div>
       </div>
-      <button class="btn-copy" data-url="${escapeHtml(utm.full)}" onclick="copyLink(this)">
+      <button class="btn-copy" data-nome="${escapeHtml(item.nome || '')}" data-url="${escapeHtml(utm.full)}" onclick="copyLink(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Copiar link
       </button>
@@ -173,9 +167,18 @@ function renderResults(results) {
   });
 }
 
-// ── Copia ──
+// ── Copia e registra estatística ──
+function incrementStat(nome) {
+  try {
+    const stats = JSON.parse(localStorage.getItem('cr_link_copy_stats_v1') || '{}');
+    stats[nome] = (stats[nome] || 0) + 1;
+    localStorage.setItem('cr_link_copy_stats_v1', JSON.stringify(stats));
+  } catch {}
+}
+
 function copyLink(btn) {
   navigator.clipboard.writeText(btn.dataset.url).then(() => {
+    if (btn.dataset.nome) incrementStat(btn.dataset.nome);
     btn.classList.add('copied');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>Copiado!`;
     setTimeout(() => {

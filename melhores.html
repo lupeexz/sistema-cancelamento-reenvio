@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Dashboard</title>
+  <title>Melhores Links</title>
   <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet" href="links.css"/>
 </head>
@@ -18,8 +18,9 @@
         <small>Reenvios/estornos</small>
       </div>
     </div>
-                <nav class="nav">
-        <details class="nav-group active-group" open>
+
+          <nav class="nav">
+        <details class="nav-group">
           <summary class="nav-group-header">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
             Reenvio / Cancelamento
@@ -30,7 +31,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               Novo cadastro
             </a>
-            <a class="nav-sub-item active" href="dashboard.html">
+            <a class="nav-sub-item" href="dashboard.html">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
               Dashboard
             </a>
@@ -40,7 +41,7 @@
             </a>
           </div>
         </details>
-        <details class="nav-group">
+        <details class="nav-group active-group" open>
           <summary class="nav-group-header">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             Links
@@ -51,13 +52,14 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               Gerador de links
             </a>
-            <a class="nav-sub-item" href="melhores.html">
+            <a class="nav-sub-item active" href="melhores.html">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               Melhores links
             </a>
           </div>
         </details>
       </nav>
+
     <div class="sidebar-footer">
       <button class="secondary" onclick="logout()" style="width:100%">Sair</button>
     </div>
@@ -66,67 +68,80 @@
   <section class="main">
     <div class="topbar">
       <div class="page-title">
-        <p class="eyebrow">Visão geral</p>
-        <h1>Dashboard</h1>
-        <p class="muted">Resumo visual dos dados enviados para a planilha.</p>
+        <p class="eyebrow">Links</p>
+        <h1>Melhores Links</h1>
+        <p class="muted">Links de pagamento mais utilizados — acesso rápido com UTM pronta.</p>
       </div>
-      <button id="refreshBtn" type="button" class="secondary">Atualizar</button>
-    </div>
-
-    <div class="toolbar card">
-      <label class="field">
-        <span>Visualizar</span>
-        <select id="filterMode">
-          <option value="all">Todos</option>
-          <option value="day">Por dia</option>
-          <option value="month">Por mês</option>
-        </select>
-      </label>
-      <label id="filterDateWrap" class="field hidden">
-        <span>Data</span>
-        <input id="filterDate" type="date"/>
-      </label>
-      <label id="filterMonthWrap" class="field hidden">
-        <span>Mês</span>
-        <input id="filterMonth" type="month"/>
-      </label>
-      <label class="field">
-        <span>Tipo</span>
-        <select id="filterType">
-          <option value="all">Todos</option>
-          <option value="Cancelamento">Cancelamento</option>
-          <option value="Reenvio">Reenvio</option>
-        </select>
-      </label>
-    </div>
-
-    <br>
-
-    <div class="grid three" style="margin-bottom:16px">
-      <div class="stat"><b id="statCancelamento">0</b><span>Cancelamentos</span></div>
-      <div class="stat"><b id="statReenvio">0</b><span>Reenvios</span></div>
-      <div class="stat"><b id="statValor">R$ 0,00</b><span>Fretes / Estornos</span></div>
-    </div>
-
-    <div class="grid three">
-      <div class="card">
-        <h3>Registros por tipo</h3>
-        <canvas id="chartTipo" class="chart" width="520" height="185"></canvas>
-      </div>
-      <div class="card">
-        <h3>Top lojas</h3>
-        <canvas id="chartLojas" class="chart" width="520" height="185"></canvas>
-      </div>
-      <div class="card">
-        <h3>Top motivos</h3>
-        <canvas id="chartMotivos" class="chart" width="520" height="185"></canvas>
+      <div class="topbar-chips">
+        <span class="status-chip">
+          <span class="status-dot-green"></span>
+          Acesso rápido
+        </span>
       </div>
     </div>
+
+    <!-- FILTRO UTM rápido -->
+    <div class="card links-config-card">
+      <p class="eyebrow" style="margin-bottom:14px">Configuração UTM</p>
+      <div class="utm-form-grid">
+        <label class="field">
+          <span>Campanha <span class="muted" style="font-size:10px;text-transform:none;letter-spacing:0">(utm_campaign)</span></span>
+          <select id="utmCampaign">
+            <option value="">— Selecione —</option>
+            <option value="carrinho_abandonado">Carrinho Abandonado</option>
+            <option value="carrinho_abandonado_fds">Carrinho Abandonado FDS</option>
+            <option value="carrinho_abandonado_completa">Carrinho Abandonado Completa</option>
+            <option value="carrinho_abandonado_perito">Carrinho Abandonado Perito</option>
+            <option value="carrinho_abandonado_20_02_24_02">Carrinho Abandonado 20/02-24/02</option>
+            <option value="carrinho_abandonado_fds_joao">Carrinho Abandonado FDS-João</option>
+            <option value="carrinho_abandonado_fds_gabriel">Carrinho Abandonado FDS-Gabriel</option>
+            <option value="popup">Popup</option>
+            <option value="preciso_de_ajuda">Preciso de ajuda</option>
+            <option value="pix_cancelado">Pix Cancelado</option>
+            <option value="instagram">Instagram</option>
+            <option value="linkme">LinkMe</option>
+            <option value="email">E-mail</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="recorrente">Recorrente</option>
+            <option value="site">Site</option>
+            <option value="preciso_de_ajuda_completa">Preciso de ajuda Completa</option>
+            <option value="campanha">Campanha</option>
+            <option value="carrinho_pagamento">Carrinho-pagamento</option>
+            <option value="campanha_frascos">Campanha-Frascos</option>
+            <option value="campanha_melhor_cliente">Campanha-Melhor-Cliente</option>
+            <option value="campanha_brasil">Campanha Brasil</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>utm_source</span>
+          <select id="utmSource">
+            <option value="reportana_3938">Reportana 3938</option>
+            <option value="reportana_1058">Reportana 1058</option>
+            <option value="whatsapp_9411">WhatsApp 9411</option>
+            <option value="whatsapp_3169">WhatsApp 3169</option>
+            <option value="email">E-mail</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>utm_medium</span>
+          <input id="utmMedium" value="whatsapp"/>
+        </label>
+      </div>
+    </div>
+
+    <!-- GRID DE MELHORES LINKS -->
+    <div id="bestEmpty" class="card links-empty">
+      <div class="links-empty-icon">📋</div>
+      Nenhum link copiado ainda. Use o <a href="links.html" style="color:var(--brand)">Gerador de links</a> e os mais copiados aparecerão aqui automaticamente.
+    </div>
+    <div id="bestGrid" class="best-grid"></div>
+
   </section>
-
 </main>
+
 <script src="config.js"></script>
 <script src="shared.js"></script>
-<script src="dashboard.js"></script>
+<script src="products.js"></script>
+<script src="melhores.js"></script>
 </body>
 </html>
