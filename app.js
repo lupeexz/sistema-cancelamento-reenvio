@@ -96,3 +96,16 @@ function setMessage(text, type) {
   $("formMessage").textContent = text;
   $("formMessage").className = `message ${type || ""}`.trim();
 }
+
+function atualizarLabelData() {
+  const tipo = document.getElementById("tipo").value;
+  const label = document.getElementById("dataAcaoLabel");
+
+  label.textContent =
+    tipo === "Cancelamento"
+      ? "Data Cancelamento"
+      : "Data Reenvio";
+}
+
+document.getElementById("tipo").addEventListener("change", atualizarLabelData);
+atualizarLabelData();

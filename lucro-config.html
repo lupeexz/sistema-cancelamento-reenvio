@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Configurações — Lucro</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<main class="app shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">CR</div>
+      <div>
+        <strong>Controle interno</strong>
+        <small>Reenvios/estornos</small>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Novo cadastro
+      </a>
+      <a href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="registros.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+        Registros efetuados
+      </a>
+      <a href="links.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Links de Pagamento
+      </a>
+      <a class="active" href="lucro.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Análise de Lucro
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="secondary" onclick="logout()" style="width:100%">Sair</button>
+    </div>
+  </aside>
+
+  <section class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <p class="eyebrow">Financeiro</p>
+        <h1>Configurações</h1>
+        <p class="muted">Configure as integrações e os custos de cada produto.</p>
+      </div>
+      <a href="lucro.html"><button class="secondary">← Voltar</button></a>
+    </div>
+
+    <!-- Credenciais -->
+    <div class="card" style="margin-bottom:16px">
+      <p class="eyebrow">Integrações</p>
+      <h2>Chaves de API</h2>
+      <p class="muted">As chaves ficam salvas apenas no seu navegador (localStorage). Nunca são enviadas a nenhum servidor externo além das próprias APIs.</p>
+
+      <div class="grid two" style="gap:16px;margin-top:8px">
+        <label class="field">
+          <span>Alias da loja Yampi</span>
+          <input id="yampiAlias" type="text" placeholder="Ex.: barba-lenhador"/>
+        </label>
+        <label class="field">
+          <span>Token Yampi (User-Token)</span>
+          <input id="yampiToken" type="password" placeholder="Seu User-Token da Yampi"/>
+        </label>
+        <label class="field">
+          <span>Secret Key Yampi</span>
+          <input id="yampiSecret" type="password" placeholder="Seu Secret Key da Yampi"/>
+        </label>
+        <label class="field">
+          <span>API Key Bling</span>
+          <input id="blingKey" type="password" placeholder="Sua API Key do Bling V3"/>
+        </label>
+      </div>
+
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button id="btnSaveKeys" type="button">Salvar chaves</button>
+        <button id="btnTestYampi" type="button" class="secondary">Testar Yampi</button>
+        <button id="btnSyncBling" type="button" class="secondary">Importar produtos do Bling</button>
+      </div>
+      <p id="keysMessage" class="message" style="margin-top:10px"></p>
+    </div>
+
+    <!-- Produtos / Custos -->
+    <div class="card" id="produtos">
+      <p class="eyebrow">Produtos</p>
+      <h2>Custo por produto</h2>
+      <p class="muted">Defina o custo de cada produto (CMV). Use <strong>Importar do Bling</strong> para puxar a lista e depois preencha os custos manualmente, ou adicione produtos avulsos.</p>
+
+      <div class="toolbar" style="margin-bottom:14px">
+        <label class="field" style="flex:1 1 240px">
+          <span>Buscar produto</span>
+          <input id="searchProd" type="text" placeholder="Nome ou SKU…"/>
+        </label>
+        <button id="btnAddProd" type="button" class="secondary" style="height:42px;align-self:flex-end">+ Adicionar manual</button>
+        <button id="btnSaveCosts" type="button" style="height:42px;align-self:flex-end">Salvar custos</button>
+      </div>
+
+      <div id="prodEmpty" class="hidden" style="text-align:center;padding:32px 0;color:var(--muted)">
+        Nenhum produto cadastrado. Importe do Bling ou adicione manualmente.
+      </div>
+
+      <div class="table-wrap" id="prodTableWrap" style="max-height:460px">
+        <table id="prodTable">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Nome</th>
+              <th style="width:170px">Custo (R$)</th>
+              <th style="width:60px"></th>
+            </tr>
+          </thead>
+          <tbody id="prodTableBody"></tbody>
+        </table>
+      </div>
+      <p id="costsMessage" class="message" style="margin-top:12px"></p>
+    </div>
+
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="shared.js"></script>
+<script src="lucro-config.js"></script>
+</body>
+</html>
