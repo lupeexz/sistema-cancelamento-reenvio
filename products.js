@@ -96,4 +96,5 @@ const PRODUCTS = [
   { nome: "Kit Lenhador + Pomada efeito úmido",                                     link_yampi: "https://seguro.loja-barbalenhador.com.br/pay/DJPR0HMVA",   categoria: "Kit" },
   { nome: "Kit Premium + Minoxidil",                                                 link_yampi: "https://seguro.loja-barbalenhador.com.br/pay/ZD6KGHVU5W",  categoria: "Kit" },
   { nome: "Máquina de acabamento",                                                   link_yampi: "https://seguro.loja-barbalenhador.com.br/pay/SWOZWUP6SW",  categoria: "Acessório" },
+  { nome: "2 Frascos Brasil",                                                   link_yampi: "https://seguro.loja-barbalenhador.com.br/pay/YDRONZYOA",  categoria: "campanha" },
 ];
