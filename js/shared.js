@@ -41,10 +41,23 @@ function lojaInitials(nome) {
 // Toggle dropdown
 function toggleLojaDropdown() {
   const drop    = document.getElementById('lojaDropdown');
+  const brand   = document.getElementById('brandLoja');
   const chevron = document.getElementById('brandChevron');
-  if (!drop) return;
-  drop.classList.toggle('hidden');
-  if (chevron) chevron.classList.toggle('open');
+  if (!drop || !brand) return;
+
+  const isHidden = drop.classList.contains('hidden');
+
+  if (isHidden) {
+    // Posiciona o dropdown abaixo do brand
+    const rect = brand.getBoundingClientRect();
+    drop.style.top  = (rect.bottom + 6) + 'px';
+    drop.style.left = rect.left + 'px';
+    drop.classList.remove('hidden');
+    if (chevron) chevron.classList.add('open');
+  } else {
+    drop.classList.add('hidden');
+    if (chevron) chevron.classList.remove('open');
+  }
 }
 
 // Fecha dropdown ao clicar fora

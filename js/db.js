@@ -1,26 +1,42 @@
 // ── Supabase client wrapper ──
-// Detecta se Supabase está configurado
 function isSupabaseReady() {
-  return CONFIG.SUPABASE_URL && !CONFIG.SUPABASE_URL.includes('COLE_AQUI');
+  return CONFIG.SUPABASE_URL &&
+    !CONFIG.SUPABASE_URL.includes('COLE_AQUI') &&
+    CONFIG.SUPABASE_ANON &&
+    !CONFIG.SUPABASE_ANON.includes('COLE_AQUI');
 }
 
-// Request helper
 async function sbFetch(path, options = {}) {
-  const url = CONFIG.SUPABASE_URL + '/rest/v1/' + path;
-  const res  = await fetch(url, {
-    ...options,
-    headers: {
-      'apikey':        CONFIG.SUPABASE_ANON,
-      'Authorization': 'Bearer ' + CONFIG.SUPABASE_ANON,
-      'Content-Type':  'application/json',
-      'Prefer':        options.prefer || 'return=representation',
-      ...(options.headers || {}),
-    },
+  const url    = CONFIG.SUPABASE_URL + '/rest/v1/' + path;
+  const isNew  = CONFIG.SUPABASE_ANON.startsWith('sb_publishable_');
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Prefer':       options.prefer !== undefined ? options.prefer : 'return=representation',
+    ...(options.headers || {}),
+  };
+
+  if (isNew) {
+    // Nova API do Supabase (chave publishable)
+    headers['apikey']        = CONFIG.SUPABASE_ANON;
+    headers['Authorization'] = 'Bearer ' + CONFIG.SUPABASE_ANON;
+  } else {
+    // API antiga (chave anon eyJ...)
+    headers['apikey']        = CONFIG.SUPABASE_ANON;
+    headers['Authorization'] = 'Bearer ' + CONFIG.SUPABASE_ANON;
+  }
+
+  const res = await fetch(url, {
+    method:  options.method || 'GET',
+    headers,
+    body:    options.body,
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || err.details || `HTTP ${res.status}`);
+    throw new Error(err.message || err.details || err.hint || `HTTP ${res.status}`);
   }
+
   return res.status === 204 ? null : res.json();
 }
 
@@ -51,13 +67,21 @@ async function dbGetRegistros() {
   return sbFetch('registros?select=*&order=criado_em.desc');
 }
 
+async function dbGetRegistrosByEmpresa(empresa) {
+  return sbFetch(`registros?select=*&empresa=eq.${encodeURIComponent(empresa)}&order=criado_em.desc`);
+}
+
 async function dbCreateRegistro(data) {
   return sbFetch('registros', { method: 'POST', body: JSON.stringify(data) });
 }
 
 // ── PRODUTOS ──
-async function dbGetProdutos() {
+async function dbGetProdutosBanco() {
   return sbFetch('produtos?select=*&ativo=eq.true&order=nome.asc');
+}
+
+async function dbGetProdutosByEmpresa(empresa) {
+  return sbFetch(`produtos?select=*&empresa=eq.${encodeURIComponent(empresa)}&ativo=eq.true&order=nome.asc`);
 }
 
 async function dbCreateProduto(data) {
@@ -65,7 +89,7 @@ async function dbCreateProduto(data) {
 }
 
 async function dbDeleteProduto(id) {
-  return sbFetch(`produtos?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ ativo: false }), prefer: '' });
+  return sbFetch(`produtos?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ ativo: false }) });
 }
 
 // ── HISTÓRICO LINKS ──
@@ -79,17 +103,17 @@ async function dbGetHistoricoLinks(limit = 100) {
 
 // ── LINK STATS ──
 async function dbIncrementStat(nome_produto) {
-  // Upsert: incrementa se existir, cria se não
-  const existing = await sbFetch(`link_stats?nome_produto=eq.${encodeURIComponent(nome_produto)}&select=*`);
-  if (existing?.length) {
-    const row = existing[0];
-    return sbFetch(`link_stats?id=eq.${row.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ contagem: row.contagem + 1, atualizado_em: new Date().toISOString() }),
-    });
-  } else {
-    return sbFetch('link_stats', { method: 'POST', body: JSON.stringify({ nome_produto, contagem: 1 }) });
-  }
+  try {
+    const existing = await sbFetch(`link_stats?nome_produto=eq.${encodeURIComponent(nome_produto)}&select=*`);
+    if (existing?.length) {
+      return sbFetch(`link_stats?id=eq.${existing[0].id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ contagem: existing[0].contagem + 1, atualizado_em: new Date().toISOString() }),
+      });
+    } else {
+      return sbFetch('link_stats', { method: 'POST', body: JSON.stringify({ nome_produto, contagem: 1 }) });
+    }
+  } catch { /* silently fail */ }
 }
 
 async function dbGetTopStats(limit = 6) {
@@ -110,46 +134,29 @@ async function dbUpdateSolicitacao(id, data) {
 }
 
 async function dbAprovarSolicitacao(sol) {
-  // Cria usuário e marca solicitação como aprovada
   await dbCreateUsuario({
     nome:       sol.nome,
     email:      sol.email,
     senha_hash: sol.senha_hash,
     role:       'atendente',
     ativo:      true,
+    lojas:      ['Barba Lenhador'],
   });
   await dbUpdateSolicitacao(sol.id, { status: 'aprovado' });
 }
 
-// ── PRODUTOS DO BANCO ──
-async function dbGetProdutosBanco() {
-  return sbFetch('produtos?select=*&ativo=eq.true&order=nome.asc');
-}
-
-// Mescla produtos do banco com os locais (banco tem prioridade)
+// ── MULTI-EMPRESA ──
 async function getAllProductsMerged() {
   if (!isSupabaseReady()) return PRODUCTS;
   try {
-    const dbProds = await dbGetProdutosBanco();
+    const empresa = getEmpresaAtiva();
+    const dbProds = await dbGetProdutosByEmpresa(empresa);
     if (!dbProds || !dbProds.length) return PRODUCTS;
-    // Converte formato do banco para o formato local
     return dbProds.map(p => ({
       nome:       p.nome,
       link_yampi: p.link_yampi,
       categoria:  p.categoria,
       id:         p.id,
-      origem:     'banco',
     }));
-  } catch {
-    return PRODUCTS;
-  }
-}
-
-// ── MULTI-EMPRESA ──
-async function dbGetRegistrosByEmpresa(empresa) {
-  return sbFetch(`registros?select=*&empresa=eq.${encodeURIComponent(empresa)}&order=criado_em.desc`);
-}
-
-async function dbGetProdutosByEmpresa(empresa) {
-  return sbFetch(`produtos?select=*&empresa=eq.${encodeURIComponent(empresa)}&ativo=eq.true&order=nome.asc`);
+  } catch { return PRODUCTS; }
 }
