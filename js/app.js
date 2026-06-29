@@ -137,6 +137,7 @@ async function handleSubmit(e) {
   const payload = {
     tipo:               $("tipo").value,
     loja:               empresaAtiva,
+    empresa:            empresaAtiva,
     dataPedido:         $("dataPedido").value,
     motivo:             $("motivo").value.trim(),
     fretesEstorno:      $("fretesEstorno").value.trim(),
@@ -146,7 +147,7 @@ async function handleSubmit(e) {
     dataReenvio:        $("dataReenvio").value,
   };
 
-  if (!payload.dataPedido || !payload.motivo || !payload.numeroPedido || !payload.whatsapp) {
+  if (!empresaAtiva || !payload.dataPedido || !payload.motivo || !payload.numeroPedido || !payload.whatsapp) {
     setMessage("Preencha todos os campos obrigatórios.", "error"); return;
   }
   if (payload.tipo === "Reenvio" && (!payload.dataReenvio || !payload.novoCodigoRastreio)) {
@@ -157,7 +158,6 @@ async function handleSubmit(e) {
   setMessage("Salvando...", "");
 
   try {
-    payload.empresa = getEmpresaAtiva();
     await apiCreateRecord(payload);
     $("entryForm").reset();
     syncRequiredFields();

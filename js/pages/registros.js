@@ -21,11 +21,13 @@ async function loadRecords(force = false) {
 
     if (!force) {
       allRecords = await apiGetRecords({ background: true });
+      allRecords = filterByEmpresa(allRecords);
       renderRecords();
     }
 
     if (force || !allRecords.length) {
       allRecords = await apiRefreshRecords();
+      allRecords = filterByEmpresa(allRecords);
       renderRecords();
     }
   } catch (error) {
@@ -34,6 +36,14 @@ async function loadRecords(force = false) {
   } finally {
     setRecordsLoading("");
   }
+}
+
+function filterByEmpresa(records) {
+  const user    = getSessionUser();
+  const empresa = getEmpresaAtiva();
+  // Admin vê todos, atendente vê só da empresa ativa
+  if (user?.role === 'admin') return records;
+  return records.filter(r => !r.empresa || r.empresa === empresa || r.loja === empresa);
 }
 
 function setRecordsLoading(text) {
