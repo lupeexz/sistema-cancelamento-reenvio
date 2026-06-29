@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard — CR</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <link rel="stylesheet" href="../assets/links.css"/>
+</head>
+<body>
+<main class="app shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">CR</div>
+      <div>
+        <strong>Controle interno</strong>
+        <small>Reenvios/estornos</small>
+      </div>
+    </div>
+    <nav class="nav">
+      <details class="nav-group active-group" open>
+        <summary class="nav-group-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+          Reenvio / Cancelamento
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="nav-sub">
+            <a class="nav-sub-item" href="../index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Novo cadastro</a>
+            <a class="nav-sub-item active" href="../pages/dashboard.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>Dashboard</a>
+            <a class="nav-sub-item" href="../pages/registros.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Registros</a>
+        </div>
+      </details>
+      <details class="nav-group" >
+        <summary class="nav-group-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Links
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="nav-sub">
+            <a class="nav-sub-item" href="../pages/links.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Gerador de links</a>
+            <a class="nav-sub-item" href="../pages/melhores.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Melhores links</a>
+            <a class="nav-sub-item" href="../pages/historico.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Histórico</a>
+            <a class="nav-sub-item" href="../pages/produtos.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Produtos</a>
+        </div>
+      </details>
+      <a class="nav-sub-item admin-only" href="../pages/usuarios.html" style="margin-top:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Usuários
+        <span class="nav-badge hidden" id="pendBadge">0</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info-box">
+        <div class="user-avatar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div>
+          <div class="user-name-display" style="font-size:12px;font-weight:600;color:var(--text)"></div>
+          <div class="user-role-display" style="font-size:11px;color:var(--muted)"></div>
+        </div>
+      </div>
+      <button class="secondary" onclick="logout()" style="width:100%;margin-top:8px">Sair</button>
+    </div>
+  </aside>
+  <section class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <p class="eyebrow">Visão geral</p>
+        <h1>Dashboard</h1>
+        <p class="muted">Resumo visual dos dados enviados para a planilha.</p>
+      </div>
+      <button id="refreshBtn" type="button" class="secondary">Atualizar</button>
+    </div>
+    <div class="toolbar card">
+      <label class="field"><span>Visualizar</span>
+        <select id="filterMode"><option value="all">Todos</option><option value="day">Por dia</option><option value="month">Por mês</option></select>
+      </label>
+      <label id="filterDateWrap" class="field hidden"><span>Data</span><input id="filterDate" type="date"/></label>
+      <label id="filterMonthWrap" class="field hidden"><span>Mês</span><input id="filterMonth" type="month"/></label>
+      <label class="field"><span>Tipo</span>
+        <select id="filterType"><option value="all">Todos</option><option value="Cancelamento">Cancelamento</option><option value="Reenvio">Reenvio</option></select>
+      </label>
+    </div>
+    <br>
+    <div class="grid three" style="margin-bottom:16px">
+      <div class="stat"><b id="statCancelamento">0</b><span>Cancelamentos</span></div>
+      <div class="stat"><b id="statReenvio">0</b><span>Reenvios</span></div>
+      <div class="stat"><b id="statValor">R$ 0,00</b><span>Fretes / Estornos</span></div>
+    </div>
+    <div class="grid three">
+      <div class="card"><h3>Registros por tipo</h3><canvas id="chartTipo" class="chart" width="520" height="185"></canvas></div>
+      <div class="card"><h3>Top lojas</h3><canvas id="chartLojas" class="chart" width="520" height="185"></canvas></div>
+      <div class="card"><h3>Top motivos</h3><canvas id="chartMotivos" class="chart" width="520" height="185"></canvas></div>
+    </div>
+  </section>
+</main>
+<script src="../js/config.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/shared.js"></script>
+<script src="../js/pages/dashboard.js"></script>
+</body>
+</html>

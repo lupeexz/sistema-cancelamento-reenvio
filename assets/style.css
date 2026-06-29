@@ -522,3 +522,135 @@ td[colspan] { text-align: center; color: var(--muted); padding: 2.5rem 0; }
 }
 
 .nav-sub-item.active svg { opacity: 1; }
+
+/* ── User info box na sidebar ── */
+.user-info-box {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0;
+}
+
+.user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--brand-dim);
+  border: 1px solid var(--brand-border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--brand);
+}
+
+/* ── Auth tabs (login / cadastro) ── */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin: 18px 0 0;
+  border-bottom: 1px solid var(--stroke-2);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 9px;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  margin-bottom: -1px;
+}
+
+.auth-tab:hover { color: var(--text); filter: none; }
+
+.auth-tab.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+.auth-panel { padding-top: 16px; }
+.auth-panel.hidden { display: none; }
+
+/* ── Badge de notificação na sidebar ── */
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+  animation: badge-pulse 2s infinite;
+}
+
+.nav-badge.hidden { display: none; }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--stroke-2);
+  border-radius: var(--radius);
+  width: min(480px, 100%);
+  box-shadow: var(--shadow);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.modal-header h3 { font-size: 15px; font-weight: 600; margin: 0; }
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.modal-close:hover { background: var(--panel-2); filter: none; }
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

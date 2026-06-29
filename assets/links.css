@@ -216,3 +216,14 @@
   .hist-row { flex-wrap: wrap; }
   .hist-copy { width: 100% !important; }
 }
+
+/* ── Produtos form ── */
+.prod-form {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+@media (max-width: 900px) { .prod-form { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .prod-form { grid-template-columns: 1fr; } }

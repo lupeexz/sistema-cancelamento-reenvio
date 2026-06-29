@@ -2,6 +2,7 @@ let allRecords = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   requireAuth();
+  showUserInfo();
 
   ["filterMode", "filterDate", "filterMonth", "filterType"].forEach((id) => {
     $(id).addEventListener("change", renderDashboard);

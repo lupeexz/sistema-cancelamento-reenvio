@@ -2,6 +2,7 @@ const HISTORY_KEY = 'cr_link_history_v1';
 
 document.addEventListener('DOMContentLoaded', () => {
   requireAuth();
+  showUserInfo();
   populateFilters();
   renderHistory();
 

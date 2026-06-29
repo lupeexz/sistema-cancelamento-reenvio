@@ -2,6 +2,7 @@ let allRecords = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   requireAuth();
+  showUserInfo();
 
   ["search", "type", "dateStart", "dateEnd"].forEach((id) => {
     $(id).addEventListener("input", renderRecords);

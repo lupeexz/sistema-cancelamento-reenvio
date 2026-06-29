@@ -1,17 +1,26 @@
 // ── Estado ──
 let lastResults = [];
+let cachedProducts = null;
 
 const HISTORY_KEY = 'cr_link_history_v1';
 const HISTORY_MAX = 100;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   requireAuth();
+  showUserInfo();
+
+  // Pré-carrega produtos do banco
+  cachedProducts = await getAllProductsMerged();
+
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
   ['utmCampaign','utmSource','utmMedium'].forEach(id => {
-    document.getElementById(id).addEventListener('input',  () => { if (lastResults.length) renderResults(lastResults); });
-    document.getElementById(id).addEventListener('change', () => { if (lastResults.length) renderResults(lastResults); });
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input',  () => { if (lastResults.length) renderResults(lastResults); });
+      el.addEventListener('change', () => { if (lastResults.length) renderResults(lastResults); });
+    }
   });
   renderHistory();
 });
@@ -27,11 +36,71 @@ function saveToHistory(nome, categoria, url, campaign, source) {
   if (history.length && history[0].url === url) return;
   history.unshift({ nome, categoria, url, campaign, source, criadoEm: new Date().toISOString() });
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, HISTORY_MAX)));
+
+  // Salva no Supabase também
+  if (isSupabaseReady()) {
+    const user = getSessionUser();
+    dbSaveHistoricoLink({
+      nome_produto: nome, categoria, url, campaign, source,
+      usuario_id:   user?.id || null,
+      usuario_nome: user?.nome || '',
+    }).catch(console.error);
+    dbIncrementStat(nome).catch(console.error);
+  }
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm('Limpar todo o histórico de links?')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('historySection');
+  const list    = document.getElementById('historyList');
+  if (!section || !list) return;
+  const history = getHistory();
+  if (!history.length) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  list.innerHTML = history.map((item, idx) => `
+    <div class="hist-row">
+      <div class="hist-info">
+        <span class="hist-nome">${escapeHtml(item.nome)}</span>
+        <div class="hist-meta">
+          <span class="hist-tag">${escapeHtml(item.campaign || '—')}</span>
+          <span class="hist-tag">${escapeHtml(item.source || '—')}</span>
+          <span class="hist-date">${formatHistDate(item.criadoEm)}</span>
+        </div>
+        <div class="hist-url">${escapeHtml(item.url)}</div>
+      </div>
+      <button class="btn-copy hist-copy" data-url="${escapeHtml(item.url)}" onclick="copyHistLink(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar
+      </button>
+    </div>
+  `).join('');
+}
+
+function formatHistDate(iso) {
+  try { return new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+  catch { return ''; }
+}
+
+function copyHistLink(btn) {
+  navigator.clipboard.writeText(btn.dataset.url).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>Copiado!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar`;
+    }, 2000);
+  });
 }
 
 // ── Busca local por similaridade ──
 function normalize(str) {
-  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
 }
 
 function score(product, query) {
@@ -56,7 +125,8 @@ function score(product, query) {
 
 function searchLocal(query) {
   if (!query.trim()) return [];
-  return PRODUCTS
+  const prods = cachedProducts || PRODUCTS;
+  return prods
     .map(p => ({ ...p, _score: score(p, query) }))
     .filter(p => p._score > 0)
     .sort((a, b) => b._score - a._score)
@@ -88,22 +158,29 @@ function buildLink(baseUrl) {
 }
 
 // ── Buscar ──
-function doSearch() {
+async function doSearch() {
   const q        = document.getElementById('searchInput').value.trim();
   const campaign = document.getElementById('utmCampaign').value;
   if (!q) return;
+
   if (!campaign) {
     document.getElementById('noCampWarn').classList.remove('hidden');
     document.getElementById('utmCampaign').focus();
     return;
   }
+
   document.getElementById('noCampWarn').classList.add('hidden');
   document.getElementById('searchError').classList.add('hidden');
   document.getElementById('resultsList').innerHTML = '';
   document.getElementById('noResultsEl').classList.add('hidden');
   document.getElementById('emptyState').classList.add('hidden');
   document.getElementById('btnSearch').disabled = true;
+
+  // Recarrega produtos se necessário
+  if (!cachedProducts) cachedProducts = await getAllProductsMerged();
+
   lastResults = searchLocal(q);
+
   if (!lastResults.length) {
     document.getElementById('noResultsEl').classList.remove('hidden');
   } else {
@@ -140,8 +217,8 @@ function renderResults(results) {
         <div class="lb-url">${escapeHtml(utm.full)}</div>
       </div>
       <button class="btn-copy"
-        data-nome="${escapeHtml(item.nome || '')}"
-        data-cat="${escapeHtml(item.categoria || '')}"
+        data-nome="${escapeHtml(item.nome||'')}"
+        data-cat="${escapeHtml(item.categoria||'')}"
         data-url="${escapeHtml(utm.full)}"
         data-campaign="${escapeHtml(utm.campaign)}"
         data-source="${escapeHtml(utm.source)}"
@@ -154,19 +231,10 @@ function renderResults(results) {
   });
 }
 
-// ── Copia e salva no histórico ──
-function incrementStat(nome) {
-  try {
-    const stats = JSON.parse(localStorage.getItem('cr_link_copy_stats_v1') || '{}');
-    stats[nome] = (stats[nome] || 0) + 1;
-    localStorage.setItem('cr_link_copy_stats_v1', JSON.stringify(stats));
-  } catch {}
-}
-
+// ── Copia e salva histórico ──
 function copyLink(btn) {
   navigator.clipboard.writeText(btn.dataset.url).then(() => {
     if (btn.dataset.nome) {
-      incrementStat(btn.dataset.nome);
       saveToHistory(btn.dataset.nome, btn.dataset.cat, btn.dataset.url, btn.dataset.campaign, btn.dataset.source);
     }
     btn.classList.add('copied');

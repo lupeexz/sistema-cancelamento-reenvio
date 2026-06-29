@@ -1,35 +1,61 @@
-# Sistema Cancelamento/Reenvio — v6
+# Controle Reenvios — v13
 
-## O que mudou nesta versão
+## Estrutura
 
-- **Design refinado**: dark theme mais limpo, sem gradientes pesados, mais fácil de ler em uso prolongado.
-- **Sidebar com ícones SVG** inline em todas as páginas — sem dependências externas.
-- **Botões de ação** na sidebar com fundo e borda corrigidos (`secondary`).
-- **Tabela de registros** sem padding externo, header sticky na rolagem.
-- **Responsividade** revisada para tablets e celulares.
-- Toda a lógica JS permanece igual (config.js, shared.js, app.js, dashboard.js, registros.js).
+```
+controle-reenvios/
+├── index.html              ← Login + Novo cadastro (raiz)
+├── assets/
+│   ├── style.css           ← Estilos globais
+│   └── links.css           ← Estilos de links/sidebar
+├── js/
+│   ├── config.js           ← ⚠️ Configure Supabase aqui
+│   ├── db.js               ← Funções de banco de dados
+│   ├── shared.js           ← Auth + helpers globais
+│   ├── products.js         ← 93 produtos Yampi
+│   ├── app.js              ← Lógica do cadastro
+│   └── pages/
+│       ├── dashboard.js
+│       ├── registros.js
+│       ├── links.js
+│       ├── melhores.js
+│       ├── historico.js
+│       ├── produtos.js
+│       └── usuarios.js
+├── pages/
+│   ├── dashboard.html
+│   ├── registros.html
+│   ├── links.html
+│   ├── melhores.html
+│   ├── historico.html
+│   ├── produtos.html
+│   └── usuarios.html
+└── sql/
+    └── supabase_setup.sql  ← Cole no SQL Editor do Supabase
+```
 
-## Arquivos alterados
+## Setup Supabase (5 min)
 
-| Arquivo | Mudança |
-|---|---|
-| `style.css` | Reescrito — mesmas variáveis, mais legível |
-| `index.html` | Ícones SVG na nav |
-| `dashboard.html` | Ícones SVG na nav |
-| `registros.html` | Ícones SVG na nav + card sem padding |
+1. Acesse https://supabase.com → crie projeto gratuito
+2. Vá em **SQL Editor** → cole `sql/supabase_setup.sql` → Execute
+3. Vá em **Settings → API Keys** e copie:
+   - **Project URL** → `SUPABASE_URL`
+   - **Chave publicável** → `SUPABASE_ANON`
+4. Edite `js/config.js` com os valores acima
 
-## Arquivos inalterados
+## Login padrão
 
-`config.js`, `shared.js`, `app.js`, `dashboard.js`, `registros.js`, `apps-script.js`
+- **E-mail:** admin@barbalenhador.com.br
+- **Senha:** admin123
 
-## Como atualizar no GitHub
+⚠️ Troque a senha após o primeiro acesso em Usuários!
+
+## GitHub Pages
 
 ```bash
 git add .
-git commit -m "v6 design refinado com icones e dark theme limpo"
+git commit -m "v13"
 git push
 ```
 
-## Apps Script
-
-Nenhuma alteração necessária. Se precisar reimplantar, use o arquivo `apps-script.js`.
+Settings → Pages → Branch main → root → Save

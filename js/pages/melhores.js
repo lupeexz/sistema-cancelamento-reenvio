@@ -24,7 +24,7 @@ function getTopProducts(n = 6) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, n)
     .map(([nome, count]) => {
-      const product = PRODUCTS.find(p => p.nome === nome);
+      const product = (window._PRODUCTS_MERGED || PRODUCTS).find(p => p.nome === nome);
       return product ? { ...product, count } : null;
     })
     .filter(Boolean);
@@ -33,6 +33,7 @@ function getTopProducts(n = 6) {
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   requireAuth();
+  showUserInfo();
   renderBest();
   ['utmCampaign','utmSource','utmMedium'].forEach(id => {
     const el = document.getElementById(id);
@@ -61,10 +62,16 @@ function buildLink(baseUrl) {
   }
 }
 
-function renderBest() {
+async function renderBest() {
   const grid = document.getElementById('bestGrid');
   const emptyState = document.getElementById('bestEmpty');
   if (!grid) return;
+
+  // Atualiza PRODUCTS global com dados do banco
+  try {
+    const merged = await getAllProductsMerged();
+    window._PRODUCTS_MERGED = merged;
+  } catch { window._PRODUCTS_MERGED = PRODUCTS; }
 
   const top = getTopProducts(6);
 
