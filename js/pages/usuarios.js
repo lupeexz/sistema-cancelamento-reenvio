@@ -107,18 +107,16 @@ function renderUsuarios(users) {
 let editingId     = null;
 let deletingUserId = null;
 
-function abrirModal(id, nome, email, role, ativo, lojas) {
+function abrirModal(id, nome, email, role, ativo, lojasParam) {
   editingId = id;
-  const u = { lojas: lojas ? JSON.parse(decodeURIComponent(lojas)) : ['Barba Lenhador'] };
+  const userLojas = lojasParam ? JSON.parse(decodeURIComponent(lojasParam)) : ['Barba Lenhador'];
   document.getElementById('editNome').value  = nome;
   document.getElementById('editEmail').value = email;
   document.getElementById('editRole').value  = role;
   document.getElementById('editAtivo').value = String(ativo);
   document.getElementById('editSenha').value = '';
-  // Lojas
-  const lojas = u ? (u.lojas || ['Barba Lenhador']) : ['Barba Lenhador'];
   document.querySelectorAll('.loja-check').forEach(cb => {
-    cb.checked = lojas.includes(cb.value);
+    cb.checked = userLojas.includes(cb.value);
   });
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
