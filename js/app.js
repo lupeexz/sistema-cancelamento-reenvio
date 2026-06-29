@@ -133,9 +133,10 @@ async function handleSubmit(e) {
   e.preventDefault();
   if ($("website").value) return;
 
+  const empresaAtiva = getEmpresaAtiva();
   const payload = {
     tipo:               $("tipo").value,
-    loja:               $("loja").value.trim(),
+    loja:               empresaAtiva,
     dataPedido:         $("dataPedido").value,
     motivo:             $("motivo").value.trim(),
     fretesEstorno:      $("fretesEstorno").value.trim(),
@@ -145,7 +146,7 @@ async function handleSubmit(e) {
     dataReenvio:        $("dataReenvio").value,
   };
 
-  if (!payload.loja || !payload.dataPedido || !payload.motivo || !payload.numeroPedido || !payload.whatsapp) {
+  if (!payload.dataPedido || !payload.motivo || !payload.numeroPedido || !payload.whatsapp) {
     setMessage("Preencha todos os campos obrigatórios.", "error"); return;
   }
   if (payload.tipo === "Reenvio" && (!payload.dataReenvio || !payload.novoCodigoRastreio)) {
