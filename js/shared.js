@@ -33,16 +33,60 @@ function setEmpresaAtiva(empresa) {
   sessionStorage.setItem('cr_empresa_ativa', empresa);
 }
 
+// Iniciais da loja
+function lojaInitials(nome) {
+  return nome.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+
+// Toggle dropdown
+function toggleLojaDropdown() {
+  const drop    = document.getElementById('lojaDropdown');
+  const chevron = document.getElementById('brandChevron');
+  if (!drop) return;
+  drop.classList.toggle('hidden');
+  if (chevron) chevron.classList.toggle('open');
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', e => {
+  const brand = document.getElementById('brandLoja');
+  const drop  = document.getElementById('lojaDropdown');
+  if (!brand || !drop) return;
+  if (!brand.contains(e.target) && !drop.contains(e.target)) {
+    drop.classList.add('hidden');
+    const chevron = document.getElementById('brandChevron');
+    if (chevron) chevron.classList.remove('open');
+  }
+});
+
 function renderEmpresaSelector() {
-  const lojas   = getUserLojas();
-  const ativa   = getEmpresaAtiva();
-  const sel     = document.getElementById('empresaSelector');
-  if (!sel) return;
-  if (lojas.length <= 1) { sel.style.display = 'none'; return; }
-  sel.style.display = 'block';
-  sel.innerHTML = lojas.map(l =>
-    `<button class="empresa-btn ${l === ativa ? 'active' : ''}" onclick="trocarEmpresa('${l}')">${l}</button>`
-  ).join('');
+  const lojas  = getUserLojas();
+  const ativa  = getEmpresaAtiva();
+
+  // Atualiza brand header
+  const brandNome   = document.getElementById('brandNome');
+  const brandAvatar = document.getElementById('brandAvatar');
+  if (brandNome)   brandNome.textContent   = ativa;
+  if (brandAvatar) brandAvatar.textContent = lojaInitials(ativa);
+
+  // Popula dropdown
+  const list = document.getElementById('lojaDropdownList');
+  if (!list) return;
+
+  if (lojas.length <= 1) {
+    const chevron = document.getElementById('brandChevron');
+    if (chevron) chevron.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = lojas.map(l => `
+    <div class="loja-option ${l === ativa ? 'active' : ''}" onclick="trocarEmpresa('${l}')">
+      <div class="loja-option-avatar">${lojaInitials(l)}</div>
+      <span class="loja-option-nome">${l}</span>
+      ${l === ativa ? '<span class="loja-option-check">✓</span>' : ''}
+    </div>
+  `).join('');
 }
 
 function trocarEmpresa(empresa) {
@@ -53,6 +97,11 @@ function trocarEmpresa(empresa) {
 function setSessionUser(user) {
   sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   sessionStorage.setItem(CONFIG.SESSION_KEY, "true");
+  // Garante que admin tem todas as lojas
+  if (user.role === 'admin' && (!user.lojas || !user.lojas.length)) {
+    user.lojas = ['Barba Lenhador', 'Perito da Barba', 'Barba Completa'];
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
 }
 
 function isAuthenticated() {
@@ -82,7 +131,7 @@ function logout() {
 function showUserInfo() {
   const user = getSessionUser();
   if (!user) return;
-  document.querySelectorAll('.user-name-display').forEach(el => el.textContent = user.nome);
+  document.querySelectorAll('.user-name-display').forEach(el => el.textContent = user.nome || '');
   document.querySelectorAll('.user-role-display').forEach(el => {
     el.textContent = user.role === 'admin' ? 'Admin' : 'Atendente';
   });
@@ -94,15 +143,7 @@ function showUserInfo() {
   loadPendingBadge();
   // Renderiza seletor de empresa
   renderEmpresaSelector();
-  // Badge empresa no topbar
-  const badge = document.getElementById('empresaBadgeTop');
-  if (badge) {
-    const lojas = getUserLojas();
-    if (lojas.length > 1 || getSessionUser()?.role === 'admin') {
-      badge.style.display = 'inline-flex';
-      badge.textContent   = '🏪 ' + getEmpresaAtiva();
-    }
-  }
+
 }
 
 // ── SHA-256 ──

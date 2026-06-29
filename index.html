@@ -68,12 +68,18 @@
   <section id="systemScreen" class="shell hidden">
 
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-badge">CR</div>
-        <div>
-          <strong>Controle interno</strong>
-          <small>Reenvios/estornos</small>
+      <!-- BRAND / LOJA SELECTOR -->
+      <div class="brand-loja" id="brandLoja" onclick="toggleLojaDropdown()">
+        <div class="brand-loja-avatar" id="brandAvatar">BL</div>
+        <div class="brand-loja-info">
+          <span class="brand-loja-nome" id="brandNome">Barba Lenhador</span>
+          <span class="brand-loja-sub">Controle interno</span>
         </div>
+        <svg class="brand-loja-chevron" id="brandChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="brand-loja-dropdown hidden" id="lojaDropdown">
+        <p class="brand-loja-dropdown-label">Minhas lojas</p>
+        <div id="lojaDropdownList"></div>
       </div>
       <nav class="nav">
         <details class="nav-group active-group" open>

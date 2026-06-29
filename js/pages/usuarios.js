@@ -57,9 +57,16 @@ async function recusar(id) {
 // ── USUÁRIOS ──
 async function loadUsuarios() {
   try {
+    if (!isSupabaseReady()) {
+      showMsg('Supabase não configurado no config.js', 'error');
+      return;
+    }
     const users = await dbGetUsuarios();
     renderUsuarios(users || []);
-  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
+  } catch(e) {
+    console.error('loadUsuarios error:', e);
+    showMsg('Erro ao carregar: ' + e.message, 'error');
+  }
 }
 
 function renderUsuarios(users) {
