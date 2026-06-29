@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.add('hidden'));
-
   if (tab === 'login') {
     document.querySelectorAll('.auth-tab')[0].classList.add('active');
     $('loginForm').classList.remove('hidden');
@@ -37,28 +36,46 @@ async function handleLogin(e) {
 
   if (isSupabaseReady()) {
     try {
-      const user = await dbGetUsuario(email);
-      if (!user || !user.ativo || user.senha_hash !== hash) {
-        errEl.textContent = "E-mail ou senha incorretos.";
+      // Busca usuário pelo email
+      const rows = await sbFetch(`usuarios?email=eq.${encodeURIComponent(email)}&select=*`);
+      const user = rows?.[0] || null;
+
+      if (!user) {
+        errEl.textContent = "E-mail não encontrado.";
         errEl.classList.remove("hidden");
         return;
       }
+
+      if (!user.ativo) {
+        errEl.textContent = "Usuário inativo. Contate o administrador.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      if (user.senha_hash !== hash) {
+        errEl.textContent = "Senha incorreta.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
       setSessionUser(user);
       showSystem();
+      return;
     } catch (err) {
-      errEl.textContent = "Erro ao conectar. Verifique o Supabase.";
+      console.error('Login error:', err);
+      errEl.textContent = "Erro ao conectar com o banco. Verifique o config.js.";
       errEl.classList.remove("hidden");
+      return;
     }
-    return;
   }
 
-  // Fallback senha mestre
+  // Fallback senha mestre (sem Supabase)
   if (hash !== CONFIG.PASSWORD_SHA256) {
     errEl.textContent = "Senha incorreta.";
     errEl.classList.remove("hidden");
     return;
   }
-  setSessionUser({ id: null, nome: "Administrador", email: "admin", role: "admin" });
+  setSessionUser({ id: null, nome: "Administrador", email: "admin", role: "admin", lojas: ["Barba Lenhador","Perito da Barba","Barba Completa"] });
   showSystem();
 }
 
@@ -70,7 +87,6 @@ async function handleRegister(e) {
   const senha  = $("regSenha").value;
   const senha2 = $("regSenha2").value;
   const msgEl  = $("registerMsg");
-
   msgEl.className = 'message hidden';
 
   if (senha !== senha2) {
@@ -78,13 +94,11 @@ async function handleRegister(e) {
     msgEl.className = 'message error';
     return;
   }
-
   if (!isSupabaseReady()) {
     msgEl.textContent = "Sistema não configurado. Contate o administrador.";
     msgEl.className = 'message error';
     return;
   }
-
   try {
     const hash = await sha256(senha);
     await dbCreateSolicitacao({ nome, email, senha_hash: hash, status: 'pendente' });
