@@ -85,16 +85,20 @@ function renderUsuarios(users) {
         </td>
         <td style="font-size:12px;color:var(--muted)">${formatDateTime(u.criado_em)}</td>
         <td class="actions">
-          <button class="mini" onclick="abrirModal('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}','${u.role}',${u.ativo})">✏️ Editar</button>
-          ${u.id !== me?.id ? `<button class="mini secondary" onclick="toggleAtivo('${u.id}',${u.ativo})" style="${u.ativo ? 'color:var(--danger);border-color:rgba(241,106,126,.3)' : 'color:var(--ok);border-color:rgba(52,199,123,.3)'}">${u.ativo ? 'Desativar' : 'Ativar'}</button>` : ''}
+          <button class="mini" onclick="abrirModal('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}','${u.role}',${u.ativo})" style="background:rgba(91,156,246,.15);color:#8ec5ff;border:1px solid rgba(91,156,246,.3)">✏️ Editar</button>
+          ${u.id !== me?.id ? `
+            <button class="mini" onclick="toggleAtivo('${u.id}',${u.ativo})" style="${u.ativo ? 'background:rgba(240,160,48,.1);color:var(--warning);border:1px solid rgba(240,160,48,.3)' : 'background:rgba(52,199,123,.1);color:var(--ok);border:1px solid rgba(52,199,123,.3)'}">${u.ativo ? 'Desativar' : 'Ativar'}</button>
+            <button class="mini" onclick="abrirDeleteUser('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}')" style="background:rgba(241,106,126,.12);color:var(--danger);border:1px solid rgba(241,106,126,.3)">🗑️ Remover</button>
+          ` : '<span style="font-size:11px;color:var(--muted)">(você)</span>'}
         </td>
       </tr>
     `).join('')
     : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Nenhum usuário.</td></tr>`;
 }
 
-// ── MODAL DE EDIÇÃO ──
-let editingId = null;
+// ── MODAL EDITAR ──
+let editingId     = null;
+let deletingUserId = null;
 
 function abrirModal(id, nome, email, role, ativo) {
   editingId = id;
@@ -114,20 +118,17 @@ function fecharModal() {
 async function handleEditSave(e) {
   e.preventDefault();
   if (!editingId) return;
-
   const data = {
     nome:  document.getElementById('editNome').value.trim(),
     email: document.getElementById('editEmail').value.trim().toLowerCase(),
     role:  document.getElementById('editRole').value,
     ativo: document.getElementById('editAtivo').value === 'true',
   };
-
   const novaSenha = document.getElementById('editSenha').value;
   if (novaSenha) {
     if (novaSenha.length < 6) { showMsg('Senha mínimo 6 caracteres.', 'error'); return; }
     data.senha_hash = await sha256(novaSenha);
   }
-
   try {
     await dbUpdateUsuario(editingId, data);
     fecharModal();
@@ -136,6 +137,30 @@ async function handleEditSave(e) {
   } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
 }
 
+// ── MODAL REMOVER USUÁRIO ──
+function abrirDeleteUser(id, nome, email) {
+  deletingUserId = id;
+  document.getElementById('deleteUserNome').textContent  = nome;
+  document.getElementById('deleteUserEmail').textContent = email;
+  document.getElementById('deleteUserOverlay').classList.remove('hidden');
+}
+
+function fecharDeleteUser() {
+  document.getElementById('deleteUserOverlay').classList.add('hidden');
+  deletingUserId = null;
+}
+
+async function confirmarDeleteUser() {
+  if (!deletingUserId) return;
+  try {
+    await dbDeleteUsuario(deletingUserId);
+    fecharDeleteUser();
+    showMsg('Usuário removido.', 'ok');
+    loadUsuarios();
+  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
+}
+
+// ── ADICIONAR ──
 async function handleAdd(e) {
   e.preventDefault();
   const nome  = document.getElementById('inputNome').value.trim();
