@@ -6,8 +6,8 @@ const CONFIG = {
   // ── Supabase ──
   // 1. Acesse https://supabase.com e crie um projeto gratuito
   // 2. Vá em Settings > API e copie os valores abaixo
-  SUPABASE_URL:    "COLE_AQUI_A_URL_DO_PROJETO",   // ex: https://xyzxyz.supabase.co
-  SUPABASE_ANON:   "COLE_AQUI_A_ANON_KEY",         // chave pública anon
+  SUPABASE_URL:    "https://vrfilocriyyysdhapmeq.supabase.co",   // ex: https://xyzxyz.supabase.co
+  SUPABASE_ANON:   "sb_publishable_esnNOQ56gWZX4ngDBjQD2g_xZWk-3tO",         // chave pública anon
 
   // ── Auth ──
   SESSION_KEY: "cr_session_v5",
