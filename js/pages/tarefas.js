@@ -38,13 +38,10 @@ function populateAtribuidoPara() {
   const user = getSessionUser();
   if (!sel) return;
 
-  if (isAdmin()) {
-    sel.innerHTML = allUsuarios.map(u =>
-      `<option value="${u.id}" data-nome="${escapeHtml(u.nome)}">${escapeHtml(u.nome)}</option>`
-    ).join('');
-  } else {
-    sel.innerHTML = `<option value="${user.id}" data-nome="${escapeHtml(user.nome)}">${escapeHtml(user.nome)} (eu)</option>`;
-  }
+  // Todos podem atribuir pra qualquer pessoa
+  sel.innerHTML = allUsuarios.map(u =>
+    `<option value="${u.id}" data-nome="${escapeHtml(u.nome)}" ${u.id === user.id ? 'selected' : ''}>${escapeHtml(u.nome)}${u.id === user.id ? ' (eu)' : ''}</option>`
+  ).join('');
 }
 
 // ── Carrega tarefas ──

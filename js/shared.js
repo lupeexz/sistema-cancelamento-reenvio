@@ -157,6 +157,8 @@ function showUserInfo() {
   loadPendingBadge();
   // Renderiza seletor de empresa
   renderEmpresaSelector();
+  // Verifica novas tarefas e notifica
+  setTimeout(checkNovasTarefas, 1500);
 
 }
 
@@ -352,5 +354,69 @@ async function loadPendingBadge() {
       tBadge.textContent = count;
       tBadge.classList.toggle('hidden', count === 0);
     }
+  } catch(e) { console.error(e); }
+}
+
+// ── Toast de notificação ──
+function showToast(msg, type = 'info', duration = 5000) {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <div class="toast-icon">${type === 'tarefa' ? '📋' : type === 'ok' ? '✓' : 'ℹ️'}</div>
+    <div class="toast-body">
+      <div class="toast-titulo">Nova tarefa atribuída</div>
+      <div class="toast-msg">${escapeHtml(msg)}</div>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+  `;
+
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('toast-show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('toast-show');
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+
+// ── Verifica novas tarefas e notifica ──
+const TAREFAS_VISTAS_KEY = 'cr_tarefas_vistas_v1';
+
+function getTarefasVistas() {
+  try { return JSON.parse(localStorage.getItem(TAREFAS_VISTAS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function marcarTarefaVista(id) {
+  const vistas = getTarefasVistas();
+  if (!vistas.includes(id)) {
+    vistas.push(id);
+    localStorage.setItem(TAREFAS_VISTAS_KEY, JSON.stringify(vistas.slice(-200)));
+  }
+}
+
+async function checkNovasTarefas() {
+  if (!isSupabaseReady() || !isAuthenticated()) return;
+  try {
+    const user    = getSessionUser();
+    const empresa = getEmpresaAtiva();
+    const vistas  = getTarefasVistas();
+
+    const tarefas = await sbFetch(
+      `tarefas?atribuido_para=eq.${user.id}&empresa=eq.${encodeURIComponent(empresa)}&status=eq.pendente&order=criado_em.desc&limit=10`
+    );
+
+    (tarefas || []).forEach(t => {
+      if (!vistas.includes(t.id)) {
+        showToast(t.titulo, 'tarefa');
+        marcarTarefaVista(t.id);
+      }
+    });
   } catch(e) { console.error(e); }
 }
