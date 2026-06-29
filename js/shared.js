@@ -104,6 +104,7 @@ function renderEmpresaSelector() {
 
 function trocarEmpresa(empresa) {
   setEmpresaAtiva(empresa);
+  clearRecordsCache();
   window.location.reload();
 }
 

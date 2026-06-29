@@ -39,10 +39,8 @@ async function loadRecords(force = false) {
 }
 
 function filterByEmpresa(records) {
-  const user    = getSessionUser();
   const empresa = getEmpresaAtiva();
-  // Admin vê todos, atendente vê só da empresa ativa
-  if (user?.role === 'admin') return records;
+  // Todos filtram pela empresa ativa — admin troca pelo dropdown
   return records.filter(r => !r.empresa || r.empresa === empresa || r.loja === empresa);
 }
 
