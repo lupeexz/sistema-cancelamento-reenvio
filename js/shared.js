@@ -327,17 +327,30 @@ function copyText(text) {
 
 // ── Badge de solicitações pendentes (admin only) ──
 async function loadPendingBadge() {
-  if (!isAdmin() || !isSupabaseReady()) return;
+  if (!isSupabaseReady()) return;
   try {
-    const all  = await dbGetSolicitacoes();
-    const pend = (all || []).filter(s => s.status === 'pendente').length;
-    const badge = document.getElementById('pendBadge');
-    if (!badge) return;
-    if (pend > 0) {
-      badge.textContent = pend;
-      badge.classList.remove('hidden');
-    } else {
-      badge.classList.add('hidden');
+    // Badge de solicitações (admin)
+    if (isAdmin()) {
+      const all  = await dbGetSolicitacoes();
+      const pend = (all || []).filter(s => s.status === 'pendente').length;
+      const badge = document.getElementById('pendBadge');
+      if (badge) {
+        badge.textContent = pend;
+        badge.classList.toggle('hidden', pend === 0);
+      }
+    }
+
+    // Badge de tarefas (todos)
+    const user    = getSessionUser();
+    const empresa = getEmpresaAtiva();
+    let query = `tarefas?status=eq.pendente&empresa=eq.${encodeURIComponent(empresa)}`;
+    if (!isAdmin()) query += `&atribuido_para=eq.${user.id}`;
+    const tarefas = await sbFetch(query);
+    const tBadge  = document.getElementById('tarefasBadge');
+    if (tBadge) {
+      const count = (tarefas || []).length;
+      tBadge.textContent = count;
+      tBadge.classList.toggle('hidden', count === 0);
     }
   } catch(e) { console.error(e); }
 }
