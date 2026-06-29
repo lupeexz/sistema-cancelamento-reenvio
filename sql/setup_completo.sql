@@ -234,3 +234,41 @@ on conflict do nothing;
 -- ============================================================
 -- FIM DO SETUP — Execute e pronto!
 -- ============================================================
+
+-- ── TAREFAS ──
+create table if not exists tarefas (
+  id uuid primary key default gen_random_uuid(),
+  titulo text not null,
+  descricao text,
+  tipo text not null default 'prazo', -- 'diaria' | 'prazo'
+  prioridade text not null default 'media', -- 'alta' | 'media' | 'baixa'
+  status text not null default 'pendente', -- 'pendente' | 'andamento' | 'concluida'
+  prazo date,
+  empresa text default 'Barba Lenhador',
+  criado_por uuid references usuarios(id),
+  criado_por_nome text,
+  atribuido_para uuid references usuarios(id),
+  atribuido_para_nome text,
+  resetar_diario boolean default false,
+  ultimo_reset date,
+  criado_em timestamptz default now(),
+  atualizado_em timestamptz default now()
+);
+
+create table if not exists tarefa_comentarios (
+  id uuid primary key default gen_random_uuid(),
+  tarefa_id uuid references tarefas(id) on delete cascade,
+  usuario_id uuid references usuarios(id),
+  usuario_nome text,
+  texto text not null,
+  criado_em timestamptz default now()
+);
+
+alter table tarefas enable row level security;
+alter table tarefa_comentarios enable row level security;
+
+drop policy if exists "allow_all_tarefas" on tarefas;
+drop policy if exists "allow_all_comentarios" on tarefa_comentarios;
+
+create policy "allow_all_tarefas"    on tarefas             for all using (true) with check (true);
+create policy "allow_all_comentarios" on tarefa_comentarios  for all using (true) with check (true);

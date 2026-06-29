@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Migração — CR</title>
+  <title>Tarefas — CR</title>
   <link rel="stylesheet" href="../assets/style.css"/>
   <link rel="stylesheet" href="../assets/links.css"/>
+  <link rel="stylesheet" href="../assets/tarefas.css"/>
 </head>
 <body>
 <main class="app shell">
   <aside class="sidebar">
-    <!-- BRAND / LOJA SELECTOR -->
     <div class="brand-loja" id="brandLoja" onclick="toggleLojaDropdown()">
       <div class="brand-loja-avatar" id="brandAvatar">BL</div>
       <div class="brand-loja-info">
@@ -19,14 +19,13 @@
       </div>
       <svg class="brand-loja-chevron" id="brandChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-
-    <!-- DROPDOWN LOJAS -->
     <div class="brand-loja-dropdown hidden" id="lojaDropdown">
       <p class="brand-loja-dropdown-label">Minhas lojas</p>
       <div id="lojaDropdownList"></div>
     </div>
+
     <nav class="nav">
-      <details class="nav-group active-group" open>
+      <details class="nav-group">
         <summary class="nav-group-header">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
           Reenvio / Cancelamento
@@ -36,7 +35,6 @@
           <a class="nav-sub-item" href="../index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Novo cadastro</a>
           <a class="nav-sub-item" href="dashboard.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>Dashboard</a>
           <a class="nav-sub-item" href="registros.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Registros</a>
-          <a class="nav-sub-item active" href="migracao.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Migração</a>
         </div>
       </details>
       <details class="nav-group">
@@ -52,7 +50,7 @@
           <a class="nav-sub-item" href="produtos.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Produtos</a>
         </div>
       </details>
-      <a class="nav-sub-item" href="tarefas.html" style="margin-top:4px">
+      <a class="nav-sub-item active" href="tarefas.html" style="margin-top:4px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         Tarefas
         <span class="nav-badge hidden" id="tarefasBadge">0</span>
@@ -63,6 +61,7 @@
         <span class="nav-badge hidden" id="pendBadge">0</span>
       </a>
     </nav>
+
     <div class="sidebar-footer">
       <div class="user-info-box">
         <div class="user-avatar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -78,53 +77,131 @@
   <section class="main">
     <div class="topbar">
       <div class="page-title">
-        <p class="eyebrow">Admin</p>
-        <h1>Migração de dados</h1>
-        <p class="muted">Importe os registros do Google Sheets para o Supabase.</p>
+        <p class="eyebrow">Operacional</p>
+        <h1>Tarefas</h1>
+        <p class="muted">Gerencie as tarefas do time.</p>
       </div>
+      <span class="status-chip" id="countChip"><span class="status-dot-green"></span>0 tarefas</span>
     </div>
 
+    <!-- CRIAR TAREFA -->
     <div class="card" style="margin-bottom:16px">
-      <p class="eyebrow" style="margin-bottom:10px">⚠️ Como funciona</p>
-      <p class="muted" style="font-size:13px;line-height:1.7">
-        Este processo busca todos os registros do Google Sheets e salva no Supabase.<br/>
-        Registros já existentes no banco <strong>não serão duplicados</strong>.<br/>
-        Execute apenas uma vez. Após a migração, todos os novos registros já serão salvos direto no banco.
-      </p>
-      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-        <button id="btnMigrar" onclick="iniciarMigracao()">
-          ▶ Iniciar migração
-        </button>
-        <button class="secondary" onclick="verificarBanco()">
-          Verificar banco atual
-        </button>
-      </div>
+      <p class="eyebrow" style="margin-bottom:14px">Nova tarefa</p>
+      <form id="formTarefa" class="tarefa-form">
+        <label class="field" style="grid-column:1/-1">
+          <span>Título</span>
+          <input id="tituloTarefa" required placeholder="Ex: Responder clientes pendentes"/>
+        </label>
+        <label class="field" style="grid-column:1/-1">
+          <span>Descrição</span>
+          <textarea id="descTarefa" placeholder="Detalhes da tarefa..." style="min-height:70px;resize:vertical"></textarea>
+        </label>
+        <label class="field">
+          <span>Tipo</span>
+          <select id="tipoTarefa">
+            <option value="diaria">🔄 Diária (reseta todo dia)</option>
+            <option value="prazo">📅 Com prazo</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Prioridade</span>
+          <select id="priorTarefa">
+            <option value="alta">🔴 Alta</option>
+            <option value="media" selected>🟡 Média</option>
+            <option value="baixa">🟢 Baixa</option>
+          </select>
+        </label>
+        <label class="field" id="prazoWrap" style="display:none">
+          <span>Prazo</span>
+          <input id="prazoTarefa" type="date"/>
+        </label>
+        <label class="field admin-only">
+          <span>Atribuir para</span>
+          <select id="atribuidoPara"></select>
+        </label>
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+          <button type="submit" style="height:38px;padding:0 20px">+ Criar tarefa</button>
+          <p id="formMsg" class="message" style="margin:0"></p>
+        </div>
+      </form>
     </div>
 
-    <div id="progressCard" class="card hidden">
-      <p class="eyebrow" style="margin-bottom:10px">Progresso</p>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar" id="progressBar" style="width:0%"></div>
-      </div>
-      <p id="progressText" class="muted" style="font-size:13px;margin-top:10px">Aguardando...</p>
+    <!-- FILTROS -->
+    <div class="card toolbar" style="margin-bottom:16px">
+      <label class="field">
+        <span>Status</span>
+        <select id="filterStatus">
+          <option value="">Todos</option>
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em andamento</option>
+          <option value="concluida">Concluída</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Prioridade</span>
+        <select id="filterPrior">
+          <option value="">Todas</option>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
+        </select>
+      </label>
     </div>
 
-    <div id="logCard" class="card hidden" style="margin-top:16px">
-      <p class="eyebrow" style="margin-bottom:10px">Log</p>
-      <div id="logBody" style="font-family:monospace;font-size:12px;color:var(--text2);max-height:400px;overflow-y:auto;line-height:1.8"></div>
+    <!-- LISTA -->
+    <div id="tarefasEmpty" class="card links-empty hidden">
+      <div class="links-empty-icon">✅</div>
+      Nenhuma tarefa encontrada. Crie a primeira!
     </div>
-
+    <div id="tarefasList" class="tarefas-grid"></div>
   </section>
 </main>
 
-<style>
-.progress-bar-wrap { background:var(--bg3); border-radius:999px; height:8px; overflow:hidden; }
-.progress-bar { background:var(--brand); height:100%; border-radius:999px; transition:width 0.3s; }
-</style>
+<!-- MODAL TAREFA -->
+<div id="tarefaModal" class="modal-overlay hidden" onclick="if(event.target===this)fecharTarefaModal()">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-header">
+      <h3 id="modalTituloTarefa"></h3>
+      <button class="modal-close" onclick="fecharTarefaModal()">✕</button>
+    </div>
+    <div class="modal-body" style="gap:14px">
+      <p id="modalDescTarefa" style="font-size:13px;color:var(--text2);line-height:1.6"></p>
+      <div class="tarefa-modal-meta">
+        <div><span class="tarefa-meta-label">Atribuído</span><span id="modalAtribuidoPara"></span></div>
+        <div><span class="tarefa-meta-label">Criado por</span><span id="modalCriadoPor"></span></div>
+        <div><span class="tarefa-meta-label">Prazo</span><span id="modalPrazo"></span></div>
+        <div><span class="tarefa-meta-label">Tipo</span><span id="modalTipo"></span></div>
+        <div><span class="tarefa-meta-label">Prioridade</span><span id="modalPrioridade"></span></div>
+      </div>
+      <label class="field">
+        <span>Status</span>
+        <select id="modalStatus">
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em andamento</option>
+          <option value="concluida">Concluída</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:8px">
+        <button onclick="salvarStatusTarefa()" style="flex:1">Salvar status</button>
+        <button id="btnDeleteTarefa" onclick="deletarTarefa()" class="secondary" style="color:var(--danger);border-color:rgba(241,106,126,.3)">Remover</button>
+      </div>
+
+      <!-- COMENTÁRIOS -->
+      <div style="border-top:1px solid var(--stroke);padding-top:14px">
+        <p class="eyebrow" style="margin-bottom:10px">Comentários</p>
+        <div id="comentariosList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:200px;overflow-y:auto"></div>
+        <form id="formComentario" style="display:flex;gap:8px">
+          <input id="textoComentario" placeholder="Adicionar comentário..." style="flex:1;height:36px;font-size:13px"/>
+          <button type="submit" style="height:36px;padding:0 14px;font-size:13px">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="../js/config.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/shared.js"></script>
-<script src="../js/pages/migracao.js"></script>
+<script src="../js/pages/tarefas.js"></script>
 </body>
 </html>

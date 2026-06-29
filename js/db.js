@@ -160,3 +160,32 @@ async function getAllProductsMerged() {
     }));
   } catch { return PRODUCTS; }
 }
+
+// ── TAREFAS ──
+async function dbGetTarefas(filtros = {}) {
+  let query = 'tarefas?select=*&order=criado_em.desc';
+  if (filtros.atribuido_para) query += `&atribuido_para=eq.${filtros.atribuido_para}`;
+  if (filtros.empresa) query += `&empresa=eq.${encodeURIComponent(filtros.empresa)}`;
+  return sbFetch(query);
+}
+
+async function dbCreateTarefa(data) {
+  return sbFetch('tarefas', { method: 'POST', body: JSON.stringify(data) });
+}
+
+async function dbUpdateTarefa(id, data) {
+  return sbFetch(`tarefas?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ ...data, atualizado_em: new Date().toISOString() }) });
+}
+
+async function dbDeleteTarefa(id) {
+  return sbFetch(`tarefas?id=eq.${id}`, { method: 'DELETE', prefer: '' });
+}
+
+// ── COMENTÁRIOS ──
+async function dbGetComentarios(tarefaId) {
+  return sbFetch(`tarefa_comentarios?tarefa_id=eq.${tarefaId}&order=criado_em.asc`);
+}
+
+async function dbCreateComentario(data) {
+  return sbFetch('tarefa_comentarios', { method: 'POST', body: JSON.stringify(data) });
+}
