@@ -49,6 +49,9 @@
         <span class="nav-badge hidden" id="pendBadge">0</span>
       </a>
     </nav>
+    <!-- SELETOR DE EMPRESA -->
+    <div id="empresaSelector" class="empresa-selector" style="display:none"></div>
+
     <div class="sidebar-footer">
       <div class="user-info-box">
         <div class="user-avatar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -140,6 +143,20 @@
           <option value="true">Ativo</option>
           <option value="false">Inativo</option>
         </select>
+      </label>
+      <label class="field">
+        <span>Lojas com acesso</span>
+        <div style="display:flex;flex-direction:column;gap:6px;background:var(--panel-2);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--stroke-2)">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text)">
+            <input type="checkbox" class="loja-check" value="Barba Lenhador"/> Barba Lenhador
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text)">
+            <input type="checkbox" class="loja-check" value="Perito da Barba"/> Perito da Barba
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text)">
+            <input type="checkbox" class="loja-check" value="Barba Completa"/> Barba Completa
+          </label>
+        </div>
       </label>
       <label class="field">
         <span>Nova senha <span style="color:var(--muted);font-weight:400">(deixe vazio para não alterar)</span></span>

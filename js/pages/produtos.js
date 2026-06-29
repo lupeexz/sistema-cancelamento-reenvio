@@ -16,7 +16,8 @@ let deletingId  = null;
 async function loadProdutos() {
   try {
     if (isSupabaseReady()) {
-      allProdutos = await dbGetProdutosBanco() || [];
+      const empresa = getEmpresaAtiva();
+      allProdutos = await dbGetProdutosByEmpresa(empresa) || [];
     } else {
       allProdutos = PRODUCTS.map(p => ({ ...p }));
     }
@@ -83,7 +84,8 @@ async function handleAdd(e) {
   try {
     if (isSupabaseReady()) {
       const user = getSessionUser();
-      await dbCreateProduto({ nome, link_yampi: link, categoria, ativo: true, criado_por: user?.id || null });
+      const empresa = getEmpresaAtiva();
+      await dbCreateProduto({ nome, link_yampi: link, categoria, ativo: true, criado_por: user?.id || null, empresa });
     }
     document.getElementById('formProduto').reset();
     showMsg(`"${nome}" adicionado com sucesso!`, 'ok');

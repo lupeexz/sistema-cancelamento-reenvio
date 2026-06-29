@@ -85,7 +85,7 @@ function renderUsuarios(users) {
         </td>
         <td style="font-size:12px;color:var(--muted)">${formatDateTime(u.criado_em)}</td>
         <td class="actions">
-          <button class="mini" onclick="abrirModal('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}','${u.role}',${u.ativo})" style="background:rgba(91,156,246,.15);color:#8ec5ff;border:1px solid rgba(91,156,246,.3)">✏️ Editar</button>
+          <button class="mini" onclick="abrirModal('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}','${u.role}',${u.ativo},'${encodeURIComponent(JSON.stringify(u.lojas||[]))}')" style="background:rgba(91,156,246,.15);color:#8ec5ff;border:1px solid rgba(91,156,246,.3)">✏️ Editar</button>
           ${u.id !== me?.id ? `
             <button class="mini" onclick="toggleAtivo('${u.id}',${u.ativo})" style="${u.ativo ? 'background:rgba(240,160,48,.1);color:var(--warning);border:1px solid rgba(240,160,48,.3)' : 'background:rgba(52,199,123,.1);color:var(--ok);border:1px solid rgba(52,199,123,.3)'}">${u.ativo ? 'Desativar' : 'Ativar'}</button>
             <button class="mini" onclick="abrirDeleteUser('${u.id}','${escapeAttr(u.nome)}','${escapeAttr(u.email)}')" style="background:rgba(241,106,126,.12);color:var(--danger);border:1px solid rgba(241,106,126,.3)">🗑️ Remover</button>
@@ -100,13 +100,19 @@ function renderUsuarios(users) {
 let editingId     = null;
 let deletingUserId = null;
 
-function abrirModal(id, nome, email, role, ativo) {
+function abrirModal(id, nome, email, role, ativo, lojas) {
   editingId = id;
+  const u = { lojas: lojas ? JSON.parse(decodeURIComponent(lojas)) : ['Barba Lenhador'] };
   document.getElementById('editNome').value  = nome;
   document.getElementById('editEmail').value = email;
   document.getElementById('editRole').value  = role;
   document.getElementById('editAtivo').value = String(ativo);
   document.getElementById('editSenha').value = '';
+  // Lojas
+  const lojas = u ? (u.lojas || ['Barba Lenhador']) : ['Barba Lenhador'];
+  document.querySelectorAll('.loja-check').forEach(cb => {
+    cb.checked = lojas.includes(cb.value);
+  });
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 
@@ -118,11 +124,13 @@ function fecharModal() {
 async function handleEditSave(e) {
   e.preventDefault();
   if (!editingId) return;
+  const lojasChecked = [...document.querySelectorAll('.loja-check:checked')].map(cb => cb.value);
   const data = {
     nome:  document.getElementById('editNome').value.trim(),
     email: document.getElementById('editEmail').value.trim().toLowerCase(),
     role:  document.getElementById('editRole').value,
     ativo: document.getElementById('editAtivo').value === 'true',
+    lojas: lojasChecked.length ? lojasChecked : ['Barba Lenhador'],
   };
   const novaSenha = document.getElementById('editSenha').value;
   if (novaSenha) {

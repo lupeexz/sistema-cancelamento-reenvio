@@ -144,3 +144,12 @@ async function getAllProductsMerged() {
     return PRODUCTS;
   }
 }
+
+// ── MULTI-EMPRESA ──
+async function dbGetRegistrosByEmpresa(empresa) {
+  return sbFetch(`registros?select=*&empresa=eq.${encodeURIComponent(empresa)}&order=criado_em.desc`);
+}
+
+async function dbGetProdutosByEmpresa(empresa) {
+  return sbFetch(`produtos?select=*&empresa=eq.${encodeURIComponent(empresa)}&ativo=eq.true&order=nome.asc`);
+}

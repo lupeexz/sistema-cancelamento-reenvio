@@ -10,6 +10,46 @@ function getSessionUser() {
   catch { return null; }
 }
 
+// ── Empresa / Multi-loja ──
+const EMPRESAS = ['Barba Lenhador', 'Perito da Barba', 'Barba Completa'];
+
+function getUserLojas() {
+  const user = getSessionUser();
+  if (!user) return [];
+  if (user.role === 'admin') return EMPRESAS;
+  return user.lojas || ['Barba Lenhador'];
+}
+
+function getEmpresaAtiva() {
+  try {
+    const stored = sessionStorage.getItem('cr_empresa_ativa');
+    const lojas  = getUserLojas();
+    if (stored && lojas.includes(stored)) return stored;
+    return lojas[0] || 'Barba Lenhador';
+  } catch { return 'Barba Lenhador'; }
+}
+
+function setEmpresaAtiva(empresa) {
+  sessionStorage.setItem('cr_empresa_ativa', empresa);
+}
+
+function renderEmpresaSelector() {
+  const lojas   = getUserLojas();
+  const ativa   = getEmpresaAtiva();
+  const sel     = document.getElementById('empresaSelector');
+  if (!sel) return;
+  if (lojas.length <= 1) { sel.style.display = 'none'; return; }
+  sel.style.display = 'block';
+  sel.innerHTML = lojas.map(l =>
+    `<button class="empresa-btn ${l === ativa ? 'active' : ''}" onclick="trocarEmpresa('${l}')">${l}</button>`
+  ).join('');
+}
+
+function trocarEmpresa(empresa) {
+  setEmpresaAtiva(empresa);
+  window.location.reload();
+}
+
 function setSessionUser(user) {
   sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   sessionStorage.setItem(CONFIG.SESSION_KEY, "true");
@@ -52,6 +92,17 @@ function showUserInfo() {
   }
   // Carrega badge de pendências
   loadPendingBadge();
+  // Renderiza seletor de empresa
+  renderEmpresaSelector();
+  // Badge empresa no topbar
+  const badge = document.getElementById('empresaBadgeTop');
+  if (badge) {
+    const lojas = getUserLojas();
+    if (lojas.length > 1 || getSessionUser()?.role === 'admin') {
+      badge.style.display = 'inline-flex';
+      badge.textContent   = '🏪 ' + getEmpresaAtiva();
+    }
+  }
 }
 
 // ── SHA-256 ──
@@ -94,7 +145,11 @@ function clearRecordsCache() {
 // ── API Records (Google Sheets fallback + Supabase) ──
 async function fetchRecordsFromApi() {
   if (isSupabaseReady()) {
-    const rows = await dbGetRegistros();
+    const empresa = getEmpresaAtiva();
+    const isAdm   = getSessionUser()?.role === 'admin';
+    const rows = isAdm
+      ? await dbGetRegistros()
+      : await dbGetRegistrosByEmpresa(empresa);
     const records = (rows || []).map(r => ({
       criadoEm:           r.criado_em,
       tipo:               r.tipo,

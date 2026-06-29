@@ -142,6 +142,7 @@ async function handleSubmit(e) {
   setMessage("Salvando...", "");
 
   try {
+    payload.empresa = getEmpresaAtiva();
     await apiCreateRecord(payload);
     $("entryForm").reset();
     syncRequiredFields();
