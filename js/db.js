@@ -59,6 +59,12 @@ async function dbUpdateUsuario(id, data) {
 }
 
 async function dbDeleteUsuario(id) {
+  // Desvincula registros e tarefas antes de remover (evita erro de FK)
+  try { await sbFetch(`registros?usuario_id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ usuario_id: null }), prefer: '' }); } catch {}
+  try { await sbFetch(`produtos?criado_por=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ criado_por: null }), prefer: '' }); } catch {}
+  try { await sbFetch(`tarefas?criado_por=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ criado_por: null }), prefer: '' }); } catch {}
+  try { await sbFetch(`tarefas?atribuido_para=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'pendente' }), prefer: '' }); } catch {}
+  try { await sbFetch(`tarefa_comentarios?usuario_id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ usuario_id: null }), prefer: '' }); } catch {}
   return sbFetch(`usuarios?id=eq.${id}`, { method: 'DELETE', prefer: '' });
 }
 

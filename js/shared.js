@@ -158,6 +158,8 @@ function showUserInfo() {
   loadPendingBadge();
   // Renderiza seletor de empresa
   renderEmpresaSelector();
+  // Atualiza ícone do tema
+  updateThemeToggleIcon(getTheme());
   // Verifica novas tarefas e notifica
   setTimeout(checkNovasTarefas, 1500);
 
@@ -433,3 +435,189 @@ async function checkNovasTarefas() {
     });
   } catch(e) { console.error(e); }
 }
+
+// ── Tema (claro/escuro) ──
+const THEME_KEY = 'cr_theme_v1';
+
+function getTheme() {
+  return localStorage.getItem(THEME_KEY) || 'dark';
+}
+
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem(THEME_KEY, theme);
+  updateThemeToggleIcon(theme);
+}
+
+function toggleTheme() {
+  const current = getTheme();
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+function updateThemeToggleIcon(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (!btn) return;
+  btn.innerHTML = theme === 'light'
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
+
+// Aplica tema salvo assim que o script carrega (evita flash)
+applyTheme(getTheme());
+document.addEventListener('DOMContentLoaded', () => updateThemeToggleIcon(getTheme()));
+
+// ── Topbar global fixa (tema + busca) ──
+function injectGlobalTopbar() {
+  if (document.getElementById('globalTopbar')) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'globalTopbar';
+  bar.innerHTML = `
+    <button id="globalSearchBtn" class="gtb-search-btn" onclick="openGlobalSearch()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Buscar...</span>
+      <kbd>Ctrl K</kbd>
+    </button>
+    <button id="globalThemeBtn" class="gtb-theme-btn" onclick="toggleTheme()" title="Alternar tema"></button>
+  `;
+  document.body.appendChild(bar);
+
+  updateThemeToggleIcon(getTheme());
+
+  // Atalho Ctrl+K
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openGlobalSearch();
+    }
+    if (e.key === 'Escape') closeGlobalSearch();
+  });
+}
+
+// Sobrescreve updateThemeToggleIcon para atualizar o botão global também
+const _origUpdateThemeIcon = updateThemeToggleIcon;
+function updateThemeToggleIcon(theme) {
+  const icon = theme === 'light'
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+  const oldBtn = document.getElementById('themeToggleBtn');
+  if (oldBtn) oldBtn.innerHTML = icon;
+
+  const globalBtn = document.getElementById('globalThemeBtn');
+  if (globalBtn) globalBtn.innerHTML = icon;
+}
+
+// ── Busca global ──
+function openGlobalSearch() {
+  let overlay = document.getElementById('globalSearchOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'globalSearchOverlay';
+    overlay.className = 'gsearch-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) closeGlobalSearch(); };
+    overlay.innerHTML = `
+      <div class="gsearch-box">
+        <div class="gsearch-input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="globalSearchInput" placeholder="Buscar páginas, pedido, WhatsApp, produto..." autocomplete="off"/>
+          <kbd>ESC</kbd>
+        </div>
+        <div id="gsearchResults" class="gsearch-results"></div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('globalSearchInput').addEventListener('input', handleGlobalSearch);
+  }
+  overlay.classList.add('gsearch-show');
+  setTimeout(() => document.getElementById('globalSearchInput').focus(), 50);
+  renderGlobalSearchDefault();
+}
+
+function closeGlobalSearch() {
+  const overlay = document.getElementById('globalSearchOverlay');
+  if (overlay) overlay.classList.remove('gsearch-show');
+}
+
+const GLOBAL_PAGES = [
+  { label: 'Novo cadastro', icon: '📝', href: 'index.html', hrefSub: '../index.html' },
+  { label: 'Dashboard',     icon: '📊', href: 'pages/dashboard.html', hrefSub: 'dashboard.html' },
+  { label: 'Registros',     icon: '📋', href: 'pages/registros.html', hrefSub: 'registros.html' },
+  { label: 'Gerador de links', icon: '🔗', href: 'pages/links.html', hrefSub: 'links.html' },
+  { label: 'Melhores links', icon: '⭐', href: 'pages/melhores.html', hrefSub: 'melhores.html' },
+  { label: 'Histórico',     icon: '🕓', href: 'pages/historico.html', hrefSub: 'historico.html' },
+  { label: 'Produtos',      icon: '📦', href: 'pages/produtos.html', hrefSub: 'produtos.html' },
+  { label: 'Tarefas',       icon: '✅', href: 'pages/tarefas.html', hrefSub: 'tarefas.html' },
+  { label: 'Usuários',      icon: '👥', href: 'pages/usuarios.html', hrefSub: 'usuarios.html' },
+  { label: 'Minha conta',   icon: '⚙️', href: 'pages/conta.html', hrefSub: 'conta.html' },
+];
+
+function isInSubPage() {
+  return window.location.pathname.includes('/pages/');
+}
+
+function renderGlobalSearchDefault() {
+  const results = document.getElementById('gsearchResults');
+  if (!results) return;
+  results.innerHTML = `
+    <div class="gsearch-section-label">Páginas</div>
+    ${GLOBAL_PAGES.map(p => `
+      <a class="gsearch-item" href="${isInSubPage() ? p.hrefSub : p.href}">
+        <span class="gsearch-item-icon">${p.icon}</span>
+        <span>${p.label}</span>
+      </a>
+    `).join('')}
+  `;
+}
+
+let searchDebounce;
+function handleGlobalSearch(e) {
+  clearTimeout(searchDebounce);
+  const q = e.target.value.trim();
+  if (!q) { renderGlobalSearchDefault(); return; }
+
+  searchDebounce = setTimeout(async () => {
+    const results = document.getElementById('gsearchResults');
+    const qLower = q.toLowerCase();
+
+    // Filtra páginas
+    const pageMatches = GLOBAL_PAGES.filter(p => p.label.toLowerCase().includes(qLower));
+
+    let html = '';
+    if (pageMatches.length) {
+      html += `<div class="gsearch-section-label">Páginas</div>`;
+      html += pageMatches.map(p => `
+        <a class="gsearch-item" href="${isInSubPage() ? p.hrefSub : p.href}">
+          <span class="gsearch-item-icon">${p.icon}</span>
+          <span>${p.label}</span>
+        </a>
+      `).join('');
+    }
+
+    // Busca em registros (se Supabase pronto)
+    if (isSupabaseReady() && q.length >= 2) {
+      try {
+        const empresa = getEmpresaAtiva();
+        const rows = await sbFetch(`registros?or=(numero_pedido.ilike.*${q}*,whatsapp.ilike.*${q}*,motivo.ilike.*${q}*)&empresa=eq.${encodeURIComponent(empresa)}&limit=5`);
+        if (rows?.length) {
+          html += `<div class="gsearch-section-label">Registros</div>`;
+          html += rows.map(r => `
+            <a class="gsearch-item" href="${isInSubPage() ? 'registros.html' : 'pages/registros.html'}">
+              <span class="gsearch-item-icon">${r.tipo === 'Reenvio' ? '📦' : '❌'}</span>
+              <span>${escapeHtml(r.numero_pedido)} — ${escapeHtml(r.motivo || '')}</span>
+            </a>
+          `).join('');
+        }
+      } catch {}
+    }
+
+    results.innerHTML = html || `<div class="gsearch-empty">Nenhum resultado para "${escapeHtml(q)}"</div>`;
+  }, 250);
+}
+
+// Injeta a topbar quando a página carrega
+document.addEventListener('DOMContentLoaded', injectGlobalTopbar);
