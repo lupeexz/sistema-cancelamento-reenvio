@@ -84,47 +84,52 @@
       <span class="status-chip" id="countChip"><span class="status-dot-green"></span>0 tarefas</span>
     </div>
 
-    <!-- CRIAR TAREFA -->
-    <div class="card" style="margin-bottom:16px">
-      <p class="eyebrow" style="margin-bottom:14px">Nova tarefa</p>
-      <form id="formTarefa" class="tarefa-form">
-        <label class="field" style="grid-column:1/-1">
-          <span>Título</span>
-          <input id="tituloTarefa" required placeholder="Ex: Responder clientes pendentes"/>
-        </label>
-        <label class="field" style="grid-column:1/-1">
-          <span>Descrição</span>
-          <textarea id="descTarefa" placeholder="Detalhes da tarefa..." style="min-height:70px;resize:vertical"></textarea>
-        </label>
-        <label class="field">
-          <span>Tipo</span>
-          <select id="tipoTarefa">
-            <option value="diaria">🔄 Diária (reseta todo dia)</option>
-            <option value="prazo">📅 Com prazo</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Prioridade</span>
-          <select id="priorTarefa">
-            <option value="alta">🔴 Alta</option>
-            <option value="media" selected>🟡 Média</option>
-            <option value="baixa">🟢 Baixa</option>
-          </select>
-        </label>
-        <label class="field" id="prazoWrap" style="display:none">
-          <span>Prazo</span>
-          <input id="prazoTarefa" type="date"/>
-        </label>
-        <label class="field">
-          <span>Atribuir para</span>
-          <select id="atribuidoPara"></select>
-        </label>
-        <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
-          <button type="submit" style="height:38px;padding:0 20px">+ Criar tarefa</button>
-          <p id="formMsg" class="message" style="margin:0"></p>
-        </div>
-      </form>
-    </div>
+    <!-- CRIAR TAREFA (recolhível) -->
+    <details class="tarefa-create-details">
+      <summary class="tarefa-create-summary">
+        <span class="tarefa-create-icon">+</span>
+        <span>Nova tarefa</span>
+      </summary>
+      <div class="card" style="margin-top:10px;margin-bottom:16px">
+        <form id="formTarefa" class="tarefa-form">
+          <label class="field" style="grid-column:1/-1">
+            <span>Título</span>
+            <input id="tituloTarefa" required placeholder="Ex: Responder clientes pendentes"/>
+          </label>
+          <label class="field" style="grid-column:1/-1">
+            <span>Descrição</span>
+            <textarea id="descTarefa" placeholder="Detalhes da tarefa..." style="min-height:60px;resize:vertical"></textarea>
+          </label>
+          <label class="field">
+            <span>Tipo</span>
+            <select id="tipoTarefa">
+              <option value="diaria">🔄 Diária (reseta todo dia)</option>
+              <option value="prazo">📅 Com prazo</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Prioridade</span>
+            <select id="priorTarefa">
+              <option value="alta">🔴 Alta</option>
+              <option value="media" selected>🟡 Média</option>
+              <option value="baixa">🟢 Baixa</option>
+            </select>
+          </label>
+          <label class="field" id="prazoWrap" style="display:none">
+            <span>Prazo</span>
+            <input id="prazoTarefa" type="date"/>
+          </label>
+          <label class="field">
+            <span>Atribuir para</span>
+            <select id="atribuidoPara"></select>
+          </label>
+          <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+            <button type="submit" style="height:38px;padding:0 20px">+ Criar tarefa</button>
+            <p id="formMsg" class="message" style="margin:0"></p>
+          </div>
+        </form>
+      </div>
+    </details>
 
     <!-- FILTROS -->
     <div class="card toolbar" style="margin-bottom:16px">
