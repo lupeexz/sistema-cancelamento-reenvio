@@ -506,10 +506,16 @@ function injectGlobalTopbar() {
       <span>Buscar...</span>
       <kbd>Ctrl K</kbd>
     </button>
+    <button id="globalBellBtn" class="gtb-theme-btn gtb-bell-btn" onclick="toggleNotifPanel()" title="Notificações">
+      🔔
+      <span id="globalBellBadge" class="gtb-bell-badge hidden">0</span>
+    </button>
     <button id="globalThemeBtn" class="gtb-theme-btn" onclick="toggleTheme()" title="Alternar tema">${getTheme() === 'light' ? ICON_SUN : ICON_MOON}</button>
     <button id="globalSettingsBtn" class="gtb-theme-btn ${isOnConta ? 'gtb-active' : ''}" onclick="window.location.href='${contaHref}'" title="Minha conta">${ICON_GEAR}</button>
   `;
   document.body.appendChild(bar);
+
+  loadNotifBell();
 
   // Atalho Ctrl+K
   document.addEventListener('keydown', e => {
@@ -630,3 +636,140 @@ function handleGlobalSearch(e) {
 
 // Injeta a topbar quando a página carrega
 document.addEventListener('DOMContentLoaded', injectGlobalTopbar);
+
+// ── Painel de Notificações (sino) ──
+let notifCache = [];
+
+async function loadNotifBell() {
+  if (!isSupabaseReady() || !isAuthenticated()) return;
+  try {
+    const user    = getSessionUser();
+    const empresa = getEmpresaAtiva();
+    const hoje    = new Date().toISOString().slice(0, 10);
+
+    const notifs = [];
+
+    // Tarefas pendentes
+    try {
+      const tarefas = await sbFetch(
+        `tarefas?atribuido_para=eq.${user.id}&empresa=eq.${encodeURIComponent(empresa)}&status=eq.pendente&order=criado_em.desc&limit=20`
+      );
+      (tarefas || []).forEach(t => {
+        const vencido  = t.prazo && t.prazo < hoje;
+        notifs.push({
+          tipo: 'tarefa',
+          icon: vencido ? '⚠️' : '📋',
+          titulo: t.titulo,
+          sub: vencido ? 'Tarefa vencida' : 'Tarefa pendente',
+          urgente: vencido,
+          href: 'tarefas.html',
+        });
+      });
+    } catch {}
+
+    // Clientes pendentes (hoje ou atrasados)
+    try {
+      const clientes = await sbFetch(
+        `clientes_pendentes?select=*&empresa=eq.${encodeURIComponent(empresa)}&data_combinada=lte.${hoje}`
+      );
+      (clientes || []).forEach(c => {
+        const atrasado = c.data_combinada < hoje;
+        notifs.push({
+          tipo: 'cliente',
+          icon: atrasado ? '⚠️' : '🔔',
+          titulo: c.nome,
+          sub: atrasado ? 'Cliente atrasado' : 'Chamar hoje',
+          urgente: atrasado,
+          href: 'clientes-pendentes.html',
+        });
+      });
+    } catch {}
+
+    // Solicitações pendentes (admin)
+    if (isAdmin()) {
+      try {
+        const sols = await sbFetch(`solicitacoes?status=eq.pendente&select=*`);
+        (sols || []).forEach(s => {
+          notifs.push({
+            tipo: 'solicitacao',
+            icon: '👤',
+            titulo: s.nome,
+            sub: 'Solicitação de acesso',
+            urgente: false,
+            href: 'usuarios.html',
+          });
+        });
+      } catch {}
+    }
+
+    // Ordena: urgentes primeiro
+    notifs.sort((a, b) => (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0));
+    notifCache = notifs;
+
+    const badge = document.getElementById('globalBellBadge');
+    if (badge) {
+      const count = notifs.length;
+      badge.textContent = count > 9 ? '9+' : count;
+      badge.classList.toggle('hidden', count === 0);
+    }
+  } catch(e) { console.error('loadNotifBell error:', e); }
+}
+
+function toggleNotifPanel() {
+  let panel = document.getElementById('notifPanel');
+  if (panel) {
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) renderNotifPanel();
+    return;
+  }
+
+  const inSubPage = window.location.pathname.includes('/pages/');
+
+  panel = document.createElement('div');
+  panel.id = 'notifPanel';
+  panel.className = 'notif-panel hidden';
+  panel.innerHTML = `
+    <div class="notif-panel-header">
+      <span>Notificações</span>
+      <button class="notif-panel-close" onclick="toggleNotifPanel()">✕</button>
+    </div>
+    <div id="notifPanelList" class="notif-panel-list"></div>
+  `;
+  document.body.appendChild(panel);
+  panel.classList.remove('hidden');
+  panel.dataset.subpage = inSubPage ? '1' : '0';
+  renderNotifPanel();
+}
+
+function renderNotifPanel() {
+  const list = document.getElementById('notifPanelList');
+  if (!list) return;
+
+  if (!notifCache.length) {
+    list.innerHTML = `<div class="notif-empty">🎉 Nenhuma notificação pendente!</div>`;
+    return;
+  }
+
+  const panel = document.getElementById('notifPanel');
+  const inSubPage = panel?.dataset.subpage === '1';
+
+  list.innerHTML = notifCache.map(n => `
+    <div class="notif-item ${n.urgente ? 'notif-urgente' : ''}" onclick="window.location.href='${inSubPage ? n.href : 'pages/' + n.href}'">
+      <span class="notif-item-icon">${n.icon}</span>
+      <div class="notif-item-body">
+        <div class="notif-item-titulo">${escapeHtml(n.titulo)}</div>
+        <div class="notif-item-sub">${escapeHtml(n.sub)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Fecha o painel ao clicar fora
+document.addEventListener('click', e => {
+  const panel = document.getElementById('notifPanel');
+  const bell  = document.getElementById('globalBellBtn');
+  if (!panel || panel.classList.contains('hidden')) return;
+  if (!panel.contains(e.target) && !bell?.contains(e.target)) {
+    panel.classList.add('hidden');
+  }
+});
