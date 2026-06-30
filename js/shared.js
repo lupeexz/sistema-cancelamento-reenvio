@@ -136,6 +136,7 @@ function isAdmin() {
 function logout() {
   sessionStorage.removeItem(CONFIG.SESSION_KEY);
   sessionStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem('cr_session_started');
   // Detecta se está em pages/ e ajusta o path
   const inSubPage = window.location.pathname.includes('/pages/');
   window.location.href = inSubPage ? '../index.html' : 'index.html';
@@ -403,6 +404,20 @@ function marcarTarefaVista(id) {
 
 async function checkNovasTarefas() {
   if (!isSupabaseReady() || !isAuthenticated()) return;
+
+  // Detecta o tipo de navegação: 'navigate' (clique em link), 'reload' (F5), 'back_forward'
+  const navEntries = performance.getEntriesByType('navigation');
+  const navType = navEntries[0]?.type || 'navigate';
+
+  // Só notifica em reload ou primeira entrada (login). Navegação por clique em link não notifica de novo.
+  const isFreshLoad = navType === 'reload' || !sessionStorage.getItem('cr_session_started');
+
+  if (!sessionStorage.getItem('cr_session_started')) {
+    sessionStorage.setItem('cr_session_started', '1');
+  }
+
+  if (!isFreshLoad) return;
+
   try {
     const user    = getSessionUser();
     const empresa = getEmpresaAtiva();
