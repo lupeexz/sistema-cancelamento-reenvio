@@ -434,6 +434,25 @@ async function checkNovasTarefas() {
       setTimeout(() => showToast(t.titulo, 'tarefa'), i * 300);
     });
   } catch(e) { console.error(e); }
+
+  // ── Alerta de clientes pendentes (atrasados ou hoje) ──
+  try {
+    const empresa = getEmpresaAtiva();
+    const hoje = new Date().toISOString().slice(0, 10);
+
+    const clientes = await sbFetch(
+      `clientes_pendentes?select=*&empresa=eq.${encodeURIComponent(empresa)}&data_combinada=lte.${hoje}`
+    );
+
+    const atrasados = (clientes || []).filter(c => c.data_combinada < hoje).length;
+    const pendHoje  = (clientes || []).filter(c => c.data_combinada === hoje).length;
+
+    if (atrasados > 0) {
+      setTimeout(() => showToast(`${atrasados} cliente${atrasados > 1 ? 's' : ''} atrasado${atrasados > 1 ? 's' : ''} pra chamar!`, 'tarefa'), 600);
+    } else if (pendHoje > 0) {
+      setTimeout(() => showToast(`${pendHoje} cliente${pendHoje > 1 ? 's' : ''} pra chamar hoje!`, 'tarefa'), 600);
+    }
+  } catch(e) { console.error(e); }
 }
 
 // ── Tema (claro/escuro) ──

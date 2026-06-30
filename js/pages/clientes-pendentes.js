@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   requireAuth();
   showUserInfo();
   await loadClientes();
-  checkAlertaHoje();
 
   document.getElementById('formCliente').addEventListener('submit', handleCreate);
 });
@@ -107,19 +106,6 @@ async function marcarChamado(id, nome) {
     showMsg('Cliente removido da lista!', 'ok');
     await loadClientes();
   } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
-}
-
-// ── Alerta toast ao entrar ──
-function checkAlertaHoje() {
-  const hoje = hojeStr();
-  const pendHoje = allClientes.filter(c => c.data_combinada === hoje).length;
-  const atrasados = allClientes.filter(c => c.data_combinada < hoje).length;
-
-  if (atrasados > 0) {
-    showToast(`${atrasados} cliente${atrasados > 1 ? 's' : ''} atrasado${atrasados > 1 ? 's' : ''} pra chamar!`, 'tarefa');
-  } else if (pendHoje > 0) {
-    showToast(`${pendHoje} cliente${pendHoje > 1 ? 's' : ''} pra chamar hoje!`, 'tarefa');
-  }
 }
 
 function showMsg(text, type) {
