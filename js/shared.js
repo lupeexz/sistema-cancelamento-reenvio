@@ -406,17 +406,13 @@ async function checkNovasTarefas() {
   try {
     const user    = getSessionUser();
     const empresa = getEmpresaAtiva();
-    const vistas  = getTarefasVistas();
 
     const tarefas = await sbFetch(
       `tarefas?atribuido_para=eq.${user.id}&empresa=eq.${encodeURIComponent(empresa)}&status=eq.pendente&order=criado_em.desc&limit=10`
     );
 
-    (tarefas || []).forEach(t => {
-      if (!vistas.includes(t.id)) {
-        showToast(t.titulo, 'tarefa');
-        marcarTarefaVista(t.id);
-      }
+    (tarefas || []).forEach((t, i) => {
+      setTimeout(() => showToast(t.titulo, 'tarefa'), i * 300);
     });
   } catch(e) { console.error(e); }
 }
