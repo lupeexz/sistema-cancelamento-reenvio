@@ -443,6 +443,11 @@ function getTheme() {
   return localStorage.getItem(THEME_KEY) || 'dark';
 }
 
+const ICON_SUN  = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+const ICON_MOON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_GEAR = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const ICON_SEARCH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+
 function applyTheme(theme) {
   if (theme === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
@@ -459,34 +464,35 @@ function toggleTheme() {
 }
 
 function updateThemeToggleIcon(theme) {
-  const btn = document.getElementById('themeToggleBtn');
-  if (!btn) return;
-  btn.innerHTML = theme === 'light'
-    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
-    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const icon = theme === 'light' ? ICON_SUN : ICON_MOON;
+  const globalBtn = document.getElementById('globalThemeBtn');
+  if (globalBtn) globalBtn.innerHTML = icon;
 }
 
 // Aplica tema salvo assim que o script carrega (evita flash)
 applyTheme(getTheme());
-document.addEventListener('DOMContentLoaded', () => updateThemeToggleIcon(getTheme()));
 
-// ── Topbar global fixa (tema + busca) ──
+// ── Topbar global fixa (busca + tema + configurações) ──
 function injectGlobalTopbar() {
   if (document.getElementById('globalTopbar')) return;
+  if (!isAuthenticated()) return; // Não mostra na tela de login
+
+  const inSubPage = window.location.pathname.includes('/pages/');
+  const contaHref = inSubPage ? 'conta.html' : 'pages/conta.html';
+  const isOnConta = window.location.pathname.includes('conta.html');
 
   const bar = document.createElement('div');
   bar.id = 'globalTopbar';
   bar.innerHTML = `
     <button id="globalSearchBtn" class="gtb-search-btn" onclick="openGlobalSearch()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      ${ICON_SEARCH}
       <span>Buscar...</span>
       <kbd>Ctrl K</kbd>
     </button>
-    <button id="globalThemeBtn" class="gtb-theme-btn" onclick="toggleTheme()" title="Alternar tema"></button>
+    <button id="globalThemeBtn" class="gtb-theme-btn" onclick="toggleTheme()" title="Alternar tema">${getTheme() === 'light' ? ICON_SUN : ICON_MOON}</button>
+    <button id="globalSettingsBtn" class="gtb-theme-btn ${isOnConta ? 'gtb-active' : ''}" onclick="window.location.href='${contaHref}'" title="Minha conta">${ICON_GEAR}</button>
   `;
   document.body.appendChild(bar);
-
-  updateThemeToggleIcon(getTheme());
 
   // Atalho Ctrl+K
   document.addEventListener('keydown', e => {
@@ -496,20 +502,6 @@ function injectGlobalTopbar() {
     }
     if (e.key === 'Escape') closeGlobalSearch();
   });
-}
-
-// Sobrescreve updateThemeToggleIcon para atualizar o botão global também
-const _origUpdateThemeIcon = updateThemeToggleIcon;
-function updateThemeToggleIcon(theme) {
-  const icon = theme === 'light'
-    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
-    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-
-  const oldBtn = document.getElementById('themeToggleBtn');
-  if (oldBtn) oldBtn.innerHTML = icon;
-
-  const globalBtn = document.getElementById('globalThemeBtn');
-  if (globalBtn) globalBtn.innerHTML = icon;
 }
 
 // ── Busca global ──

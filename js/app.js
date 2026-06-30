@@ -117,6 +117,7 @@ function showSystem() {
   $("systemScreen").classList.remove("hidden");
   showUserInfo();
   loadMiniStats();
+  injectGlobalTopbar();
 }
 
 function syncRequiredFields() {

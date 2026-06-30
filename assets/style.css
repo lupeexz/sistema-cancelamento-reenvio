@@ -1166,3 +1166,9 @@ td[colspan] { text-align: center; color: var(--muted); padding: 2.5rem 0; }
   color: var(--muted);
   font-size: 13px;
 }
+
+.gtb-theme-btn.gtb-active {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+}
