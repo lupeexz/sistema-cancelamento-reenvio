@@ -7,9 +7,10 @@
 
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Minha Conta — CR</title>
+  <title>Clientes Pendentes — CR</title>
   <link rel="stylesheet" href="../assets/style.css"/>
   <link rel="stylesheet" href="../assets/links.css"/>
+  <link rel="stylesheet" href="../assets/tarefas.css"/>
 </head>
 <body>
 <main class="app shell">
@@ -53,8 +54,8 @@
           <a class="nav-sub-item" href="produtos.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Produtos</a>
         </div>
       </details>
-      <a class="nav-sub-item" href="clientes-pendentes.html" style="margin-top:4px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 8v4l2 1"/></svg>
+      <a class="nav-sub-item active" href="clientes-pendentes.html" style="margin-top:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="17" cy="3.13" r="0"/><path d="M12 12v4"/><path d="M16 8v4l2 1"/></svg>
         Clientes Pendentes
       </a>
       <a class="nav-sub-item" href="tarefas.html" style="margin-top:4px">
@@ -67,10 +68,6 @@
         Usuários
         <span class="nav-badge hidden" id="pendBadge">0</span>
       </a>
-      <a class="nav-sub-item active" href="conta.html" style="margin-top:4px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Minha conta
-      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -80,7 +77,6 @@
           <div class="user-name-display" style="font-size:12px;font-weight:600;color:var(--text)"></div>
           <div class="user-role-display" style="font-size:11px;color:var(--muted)"></div>
         </div>
-        
       </div>
       <button class="secondary" onclick="logout()" style="width:100%;margin-top:8px">Sair</button>
     </div>
@@ -89,66 +85,61 @@
   <section class="main">
     <div class="topbar">
       <div class="page-title">
-        <p class="eyebrow">Perfil</p>
-        <h1>Minha conta</h1>
-        <p class="muted">Atualize suas informações de acesso.</p>
+        <p class="eyebrow">Operacional</p>
+        <h1>Clientes Pendentes</h1>
+        <p class="muted">Clientes que combinaram comprar em uma data futura.</p>
       </div>
+      <span class="status-chip" id="countChip"><span class="status-dot-green"></span>0 clientes</span>
     </div>
 
-    <div class="grid two" style="max-width:900px">
-      <!-- DADOS PESSOAIS -->
-      <div class="card">
-        <p class="eyebrow" style="margin-bottom:14px">Dados pessoais</p>
-        <form id="formDados" style="display:flex;flex-direction:column;gap:12px">
+    <!-- CADASTRAR -->
+    <details class="tarefa-create-details">
+      <summary class="tarefa-create-summary">
+        <span class="tarefa-create-icon">+</span>
+        <span>Novo cliente pendente</span>
+      </summary>
+      <div class="card" style="margin-top:10px;margin-bottom:16px">
+        <form id="formCliente" class="cliente-form">
           <label class="field">
-            <span>Nome completo</span>
-            <input id="contaNome" required/>
+            <span>Nome do cliente</span>
+            <input id="clienteNome" required placeholder="Ex: João Silva"/>
           </label>
           <label class="field">
-            <span>E-mail</span>
-            <input id="contaEmail" type="email" required/>
+            <span>WhatsApp</span>
+            <input id="clienteWhats" required placeholder="Ex: 15997246236"/>
           </label>
-          <button type="submit" style="margin-top:4px">Salvar dados</button>
-          <p id="msgDados" class="message"></p>
+          <label class="field">
+            <span>Quantidade de frascos</span>
+            <input id="clienteFrascos" type="number" min="1" value="1"/>
+          </label>
+          <label class="field">
+            <span>Data combinada</span>
+            <input id="clienteData" type="date" required/>
+          </label>
+          <label class="field" style="grid-column:1/-1">
+            <span>Observação (opcional)</span>
+            <input id="clienteObs" placeholder="Ex: Prefere pix, ligar antes das 18h..."/>
+          </label>
+          <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+            <button type="submit" style="height:38px;padding:0 20px">+ Agendar cliente</button>
+            <p id="formMsg" class="message" style="margin:0"></p>
+          </div>
         </form>
       </div>
+    </details>
 
-      <!-- ALTERAR SENHA -->
-      <div class="card">
-        <p class="eyebrow" style="margin-bottom:14px">Alterar senha</p>
-        <form id="formSenha" style="display:flex;flex-direction:column;gap:12px">
-          <label class="field">
-            <span>Senha atual</span>
-            <input id="senhaAtual" type="password" required placeholder="Digite sua senha atual"/>
-          </label>
-          <label class="field">
-            <span>Nova senha</span>
-            <input id="senhaNova" type="password" required minlength="6" placeholder="Mínimo 6 caracteres"/>
-          </label>
-          <label class="field">
-            <span>Confirmar nova senha</span>
-            <input id="senhaNova2" type="password" required minlength="6" placeholder="Repita a nova senha"/>
-          </label>
-          <button type="submit" style="margin-top:4px">Alterar senha</button>
-          <p id="msgSenha" class="message"></p>
-        </form>
-      </div>
+    <!-- LISTA -->
+    <div id="clientesEmpty" class="card links-empty hidden">
+      <div class="links-empty-icon">📅</div>
+      Nenhum cliente pendente. Agende o primeiro!
     </div>
-
-    <!-- INFO DA CONTA -->
-    <div class="card" style="max-width:900px;margin-top:16px">
-      <p class="eyebrow" style="margin-bottom:10px">Informações da conta</p>
-      <div class="tarefa-modal-meta" style="grid-template-columns:1fr 1fr 1fr">
-        <div><span class="tarefa-meta-label">Perfil</span><span id="infoRole">—</span></div>
-        <div><span class="tarefa-meta-label">Lojas com acesso</span><span id="infoLojas">—</span></div>
-        <div><span class="tarefa-meta-label">Conta criada em</span><span id="infoCriado">—</span></div>
-      </div>
-    </div>
+    <div id="clientesList" class="clientes-grid"></div>
   </section>
 </main>
+
 <script src="../js/config.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/shared.js"></script>
-<script src="../js/pages/conta.js"></script>
+<script src="../js/pages/clientes-pendentes.js"></script>
 </body>
 </html>

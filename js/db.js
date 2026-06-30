@@ -204,3 +204,16 @@ async function dbUpdateRegistro(id, data) {
 async function dbDeleteRegistro(id) {
   return sbFetch(`registros?id=eq.${id}`, { method: 'DELETE', prefer: '' });
 }
+
+// ── CLIENTES PENDENTES ──
+async function dbGetClientesPendentes(empresa) {
+  return sbFetch(`clientes_pendentes?select=*&empresa=eq.${encodeURIComponent(empresa)}&order=data_combinada.asc`);
+}
+
+async function dbCreateClientePendente(data) {
+  return sbFetch('clientes_pendentes', { method: 'POST', body: JSON.stringify(data) });
+}
+
+async function dbDeleteClientePendente(id) {
+  return sbFetch(`clientes_pendentes?id=eq.${id}`, { method: 'DELETE', prefer: '' });
+}

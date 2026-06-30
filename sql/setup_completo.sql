@@ -272,3 +272,22 @@ drop policy if exists "allow_all_comentarios" on tarefa_comentarios;
 
 create policy "allow_all_tarefas"    on tarefas             for all using (true) with check (true);
 create policy "allow_all_comentarios" on tarefa_comentarios  for all using (true) with check (true);
+
+-- ── CLIENTES PENDENTES ──
+create table if not exists clientes_pendentes (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null,
+  whatsapp text not null,
+  quantidade_frascos integer default 1,
+  data_combinada date not null,
+  observacao text,
+  empresa text default 'Barba Lenhador',
+  criado_por uuid references usuarios(id),
+  criado_por_nome text,
+  criado_em timestamptz default now()
+);
+
+alter table clientes_pendentes enable row level security;
+
+drop policy if exists "allow_all_clientes_pendentes" on clientes_pendentes;
+create policy "allow_all_clientes_pendentes" on clientes_pendentes for all using (true) with check (true);

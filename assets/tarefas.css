@@ -139,3 +139,66 @@
   border-color: var(--brand-border);
   box-shadow: 0 4px 16px rgba(0,0,0,.25);
 }
+
+/* ── Clientes pendentes ── */
+.cliente-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+@media (max-width: 900px) { .cliente-form { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .cliente-form { grid-template-columns: 1fr; } }
+
+.clientes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.cliente-card {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .15s, transform .1s;
+}
+
+.cliente-card:hover { transform: translateY(-1px); }
+
+.cliente-card.cliente-atrasado {
+  border-color: rgba(241,106,126,.5);
+  background: rgba(241,106,126,.05);
+  box-shadow: 0 0 0 1px rgba(241,106,126,.2);
+}
+
+.cliente-card.cliente-hoje {
+  border-color: rgba(240,160,48,.5);
+  background: rgba(240,160,48,.05);
+}
+
+.cliente-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.cliente-nome { font-size: 14px; font-weight: 700; color: var(--text); }
+.cliente-whats { font-size: 12px; color: var(--brand); }
+
+.cliente-badge-data {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cliente-badge-normal   { background: var(--panel-2); color: var(--muted); border: 1px solid var(--stroke); }
+.cliente-badge-hoje     { background: rgba(240,160,48,.12); color: var(--warning); border: 1px solid rgba(240,160,48,.3); }
+.cliente-badge-atrasado { background: rgba(241,106,126,.15); color: var(--danger); border: 1px solid rgba(241,106,126,.3); }
+
+.cliente-meta { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.cliente-obs { font-size: 12px; color: var(--text2); line-height: 1.5; margin: 0; }
+
+.cliente-actions { display: flex; gap: 8px; margin-top: 4px; }
