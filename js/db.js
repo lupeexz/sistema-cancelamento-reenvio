@@ -189,3 +189,12 @@ async function dbGetComentarios(tarefaId) {
 async function dbCreateComentario(data) {
   return sbFetch('tarefa_comentarios', { method: 'POST', body: JSON.stringify(data) });
 }
+
+// ── EDITAR / REMOVER REGISTRO ──
+async function dbUpdateRegistro(id, data) {
+  return sbFetch(`registros?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+}
+
+async function dbDeleteRegistro(id) {
+  return sbFetch(`registros?id=eq.${id}`, { method: 'DELETE', prefer: '' });
+}

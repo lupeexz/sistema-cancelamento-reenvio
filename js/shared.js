@@ -209,9 +209,11 @@ async function fetchRecordsFromApi() {
       ? await dbGetRegistros()
       : await dbGetRegistrosByEmpresa(empresa);
     const records = (rows || []).map(r => ({
+      id:                 r.id,
       criadoEm:           r.criado_em,
       tipo:               r.tipo,
       loja:               r.loja,
+      empresa:            r.empresa,
       dataPedido:         r.data_pedido,
       motivo:             r.motivo,
       fretesEstorno:      r.fretes_estorno,

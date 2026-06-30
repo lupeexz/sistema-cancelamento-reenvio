@@ -102,6 +102,78 @@
       </div>
     </div>
   </section>
+
+<!-- MODAL EDITAR REGISTRO -->
+<div id="editRegistroOverlay" class="modal-overlay hidden" onclick="if(event.target===this)fecharEditRegistro()">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-header">
+      <h3>Editar registro</h3>
+      <button class="modal-close" onclick="fecharEditRegistro()">✕</button>
+    </div>
+    <form id="formEditRegistro" class="modal-body" onsubmit="salvarEditRegistro(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label class="field">
+        <span>Tipo</span>
+        <select id="editTipo">
+          <option value="Cancelamento">Cancelamento</option>
+          <option value="Reenvio">Reenvio</option>
+          <option value="Reenvio Pagante">Reenvio Pagante</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Número do Pedido</span>
+        <input id="editPedido"/>
+      </label>
+      <label class="field" style="grid-column:1/-1">
+        <span>Motivo</span>
+        <input id="editMotivo"/>
+      </label>
+      <label class="field">
+        <span>Fretes / Estorno</span>
+        <input id="editFretes"/>
+      </label>
+      <label class="field">
+        <span>WhatsApp</span>
+        <input id="editWhatsapp"/>
+      </label>
+      <label class="field">
+        <span>Data Pedido</span>
+        <input id="editDataPedido" type="date"/>
+      </label>
+      <label class="field">
+        <span>Data Reenvio</span>
+        <input id="editDataReenvio" type="date"/>
+      </label>
+      <label class="field" style="grid-column:1/-1">
+        <span>Novo Código de Rastreio</span>
+        <input id="editRastreio"/>
+      </label>
+      <div style="grid-column:1/-1;display:flex;gap:10px;margin-top:6px">
+        <button type="submit" style="flex:1">Salvar alterações</button>
+        <button type="button" class="secondary" onclick="fecharEditRegistro()" style="flex:1">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL REMOVER REGISTRO -->
+<div id="deleteRegistroOverlay" class="modal-overlay hidden" onclick="if(event.target===this)fecharDeleteRegistro()">
+  <div class="modal-card" style="max-width:400px">
+    <div class="modal-header">
+      <h3 style="color:var(--danger)">⚠️ Remover registro</h3>
+      <button class="modal-close" onclick="fecharDeleteRegistro()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:6px">Pedido:</p>
+      <p id="deleteRegistroPedido" style="font-size:14px;font-weight:600;color:var(--text);background:var(--panel-2);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:16px"></p>
+      <p style="font-size:13px;color:var(--danger);margin-bottom:16px">⚠️ Esta ação não pode ser desfeita.</p>
+      <div style="display:flex;gap:10px">
+        <button onclick="confirmarDeleteRegistro()" style="flex:1;background:var(--danger)">Remover</button>
+        <button class="secondary" onclick="fecharDeleteRegistro()" style="flex:1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 <script src="../js/config.js"></script>
 <script src="../js/db.js"></script>
