@@ -326,3 +326,47 @@
   transition: all .12s;
 }
 .tarefa-status-btn:hover { background: var(--panel-3); filter: none; transform: none; }
+
+/* ── Atribuir para múltiplas pessoas ── */
+.atribuir-multi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.atribuir-check {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+}
+
+.atribuir-check input[type="checkbox"] { display: none; }
+
+.atribuir-check span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke-2);
+  background: var(--panel-2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .12s;
+  white-space: nowrap;
+}
+
+.atribuir-check:has(input:checked) span {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.atribuir-check span:hover { border-color: var(--brand-border); }
+
+/* ── Abas centralizadas ── */
+.tarefa-tabs {
+  justify-content: center;
+}

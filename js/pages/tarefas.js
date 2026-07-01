@@ -171,15 +171,18 @@ async function avancarStatus(id, novoStatus) {
   } catch(e) { console.error(e); }
 }
 
-// ── Carrega select de usuários ──
+// ── Carrega checkboxes de usuários ──
 async function loadUsuariosSelect() {
   try {
     const users = await dbGetUsuarios();
     const user  = getSessionUser();
-    const sel   = document.getElementById('atribuidoPara');
-    sel.innerHTML = (users || []).map(u =>
-      `<option value="${u.id}" data-nome="${escapeHtml(u.nome)}" ${u.id === user.id ? 'selected' : ''}>${escapeHtml(u.nome)}${u.id === user.id ? ' (eu)' : ''}</option>`
-    ).join('');
+    const wrap  = document.getElementById('atribuidoPara');
+    wrap.innerHTML = (users || []).map(u => `
+      <label class="atribuir-check">
+        <input type="checkbox" value="${u.id}" data-nome="${escapeHtml(u.nome)}" ${u.id === user.id ? 'checked' : ''}>
+        <span>${escapeHtml(u.nome)}${u.id === user.id ? ' (eu)' : ''}</span>
+      </label>
+    `).join('');
   } catch(e) { console.error(e); }
 }
 
@@ -188,18 +191,23 @@ async function handleCriarTarefa(e) {
   e.preventDefault();
   const user    = getSessionUser();
   const tipo    = document.getElementById('tipoTarefa').value;
-  const sel     = document.getElementById('atribuidoPara');
-  const selOpt  = sel.options[sel.selectedIndex];
+
+  // Pega todos os usuários selecionados
+  const checked = [...document.querySelectorAll('#atribuidoPara input:checked')];
+  if (!checked.length) { showMsg('Selecione ao menos uma pessoa.', 'error'); return; }
 
   let diasSemana = null;
   if (tipo === 'semanal') {
-    const checked = [...document.querySelectorAll('#diasSemanaPicker input:checked')];
-    diasSemana = checked.map(c => parseInt(c.value));
+    const dias = [...document.querySelectorAll('#diasSemanaPicker input:checked')];
+    diasSemana = dias.map(c => parseInt(c.value));
     if (!diasSemana.length) { showMsg('Selecione ao menos 1 dia da semana.', 'error'); return; }
   }
 
-  const data = {
-    titulo:              document.getElementById('tituloTarefa').value.trim(),
+  const titulo = document.getElementById('tituloTarefa').value.trim();
+  if (!titulo) { showMsg('Título é obrigatório.', 'error'); return; }
+
+  const base = {
+    titulo,
     descricao:           document.getElementById('descTarefa').value.trim(),
     tipo,
     prioridade:          document.getElementById('priorTarefa').value,
@@ -211,19 +219,29 @@ async function handleCriarTarefa(e) {
     empresa:             getEmpresaAtiva(),
     criado_por:          user.id,
     criado_por_nome:     user.nome,
-    atribuido_para:      sel.value,
-    atribuido_para_nome: selOpt?.dataset.nome || '',
   };
 
-  if (!data.titulo) { showMsg('Título é obrigatório.', 'error'); return; }
-
   try {
-    await sbFetch('tarefas', { method: 'POST', body: JSON.stringify(data) });
+    // Cria uma tarefa por pessoa selecionada
+    await Promise.all(checked.map(cb => sbFetch('tarefas', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...base,
+        atribuido_para:      cb.value,
+        atribuido_para_nome: cb.dataset.nome,
+      })
+    })));
+
     document.getElementById('formTarefa').reset();
     toggleTipoFields();
-    showMsg('Tarefa criada!', 'ok');
+    // Marca o "eu" como checked novamente após reset
+    const myChk = document.querySelector(`#atribuidoPara input[value="${user.id}"]`);
+    if (myChk) myChk.checked = true;
+
+    const qtd = checked.length;
+    showMsg(`Tarefa criada para ${qtd} pessoa${qtd > 1 ? 's' : ''}!`, 'ok');
     await loadTarefas();
-  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
+  } catch(err) { showMsg('Erro: ' + err.message, 'error'); }
 }
 
 // ── Modal de tarefa ──
