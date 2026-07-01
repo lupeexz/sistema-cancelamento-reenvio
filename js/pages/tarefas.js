@@ -1,144 +1,202 @@
-let allTarefas    = [];
-let allUsuarios   = [];
-let tarefaAberta  = null;
+let allTarefas = [];
+let statusTab = 'pendente'; // aba ativa
 
-document.addEventListener('DOMContentLoaded', async () => {
+const DIAS_NOMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+document.addEventListener('DOMContentLoaded', () => {
   requireAuth();
   showUserInfo();
-  await loadUsuarios();
-  await loadTarefas();
-  resetDiarias();
+  loadTarefas();
+  loadUsuariosSelect();
 
-  document.getElementById('formTarefa').addEventListener('submit', handleCreate);
-  document.getElementById('formComentario').addEventListener('submit', handleComentario);
-  document.getElementById('filterStatus').addEventListener('change', renderTarefas);
-  document.getElementById('filterPrior').addEventListener('change', renderTarefas);
-  document.getElementById('tipoTarefa').addEventListener('change', togglePrazo);
-  togglePrazo();
-});
+  document.getElementById('tipoTarefa').addEventListener('change', toggleTipoFields);
+  document.getElementById('formTarefa').addEventListener('submit', handleCriarTarefa);
 
-// ── Reset diárias ──
-function resetDiarias() {
-  const hoje = new Date().toISOString().slice(0, 10);
-  allTarefas.forEach(async t => {
-    if (t.resetar_diario && t.ultimo_reset !== hoje && t.status === 'concluida') {
-      await dbUpdateTarefa(t.id, { status: 'pendente', ultimo_reset: hoje });
+  // Limita seleção de dias a 3
+  document.getElementById('diasSemanaPicker').addEventListener('change', e => {
+    if (e.target.type !== 'checkbox') return;
+    const checked = document.querySelectorAll('#diasSemanaPicker input:checked');
+    if (checked.length > 3) {
+      e.target.checked = false;
+      showMsg('Máximo de 3 dias por semana.', 'error');
     }
   });
+});
+
+// ── Aba ativa ──
+function setTabStatus(status) {
+  statusTab = status;
+  document.querySelectorAll('.tarefa-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab' + status.charAt(0).toUpperCase() + status.slice(1))?.classList.add('active');
+  renderTarefas();
 }
 
-// ── Carrega usuários ──
-async function loadUsuarios() {
-  try { allUsuarios = await dbGetUsuarios() || []; } catch {}
-  populateAtribuidoPara();
-}
-
-function populateAtribuidoPara() {
-  const sel  = document.getElementById('atribuidoPara');
-  const user = getSessionUser();
-  if (!sel) return;
-
-  // Todos podem atribuir pra qualquer pessoa
-  sel.innerHTML = allUsuarios.map(u =>
-    `<option value="${u.id}" data-nome="${escapeHtml(u.nome)}" ${u.id === user.id ? 'selected' : ''}>${escapeHtml(u.nome)}${u.id === user.id ? ' (eu)' : ''}</option>`
-  ).join('');
+// ── Tipo de tarefa ──
+function toggleTipoFields() {
+  const tipo = document.getElementById('tipoTarefa').value;
+  document.getElementById('prazoWrap').style.display       = tipo === 'prazo'    ? '' : 'none';
+  document.getElementById('diasSemanaWrap').style.display  = tipo === 'semanal'  ? '' : 'none';
 }
 
 // ── Carrega tarefas ──
 async function loadTarefas() {
   try {
-    const user    = getSessionUser();
+    const hoje    = new Date().toISOString().slice(0, 10);
+    const diaSem  = new Date().getDay(); // 0=dom ... 6=sab
     const empresa = getEmpresaAtiva();
-    const filtros = { empresa };
-    if (!isAdmin()) filtros.atribuido_para = user.id;
-    allTarefas = await dbGetTarefas(filtros) || [];
+    const user    = getSessionUser();
+    const isAdm   = isAdmin();
+
+    const rows = await (isAdm
+      ? sbFetch(`tarefas?empresa=eq.${encodeURIComponent(empresa)}&order=criado_em.desc`)
+      : sbFetch(`tarefas?empresa=eq.${encodeURIComponent(empresa)}&atribuido_para=eq.${user.id}&order=criado_em.desc`)
+    );
+
+    allTarefas = rows || [];
+
+    // Reset automático
+    const resets = [];
+    for (const t of allTarefas) {
+      if (t.status !== 'concluida') continue;
+
+      const deveResetar =
+        (t.tipo === 'diaria'  && t.ultimo_reset !== hoje) ||
+        (t.tipo === 'semanal' && Array.isArray(t.dias_semana) && t.dias_semana.includes(diaSem) && t.ultimo_reset !== hoje);
+
+      if (deveResetar) {
+        resets.push(sbFetch(`tarefas?id=eq.${t.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'pendente', ultimo_reset: hoje })
+        }));
+        t.status      = 'pendente';
+        t.ultimo_reset = hoje;
+      }
+    }
+    if (resets.length) await Promise.all(resets);
+
     renderTarefas();
-    updateBadge();
   } catch(e) { console.error(e); }
 }
 
-function updateBadge() {
-  const pendentes = allTarefas.filter(t => t.status === 'pendente').length;
-  const badge = document.getElementById('tarefasBadge');
-  if (badge) {
-    badge.textContent = pendentes;
-    badge.classList.toggle('hidden', pendentes === 0);
-  }
-}
-
 // ── Renderiza ──
-function getFiltered() {
-  const status = document.getElementById('filterStatus').value;
-  const prior  = document.getElementById('filterPrior').value;
-  return allTarefas.filter(t => {
-    if (status && t.status !== status) return false;
-    if (prior  && t.prioridade !== prior) return false;
-    return true;
-  });
-}
-
 function renderTarefas() {
-  const items  = getFiltered();
-  const list   = document.getElementById('tarefasList');
-  const empty  = document.getElementById('tarefasEmpty');
-  const chip   = document.getElementById('countChip');
+  const hoje   = new Date().toISOString().slice(0, 10);
+  const amanha = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
-  chip.innerHTML = `<span class="status-dot-green"></span>${allTarefas.length} tarefa${allTarefas.length !== 1 ? 's' : ''}`;
+  const pendente  = allTarefas.filter(t => t.status === 'pendente');
+  const andamento = allTarefas.filter(t => t.status === 'andamento');
+  const concluida = allTarefas.filter(t => t.status === 'concluida');
 
-  if (!items.length) {
-    list.innerHTML = '';
+  document.getElementById('countPendente').textContent  = pendente.length;
+  document.getElementById('countAndamento').textContent = andamento.length;
+  document.getElementById('countConcluida').textContent = concluida.length;
+
+  const lista = statusTab === 'pendente'  ? pendente
+              : statusTab === 'andamento' ? andamento
+              : concluida;
+
+  const empty = document.getElementById('tarefasEmpty');
+  const grid  = document.getElementById('tarefasList');
+
+  if (!lista.length) {
+    const msgs = {
+      pendente:  'Nenhuma tarefa pendente! 🎉',
+      andamento: 'Nenhuma tarefa em andamento.',
+      concluida: 'Nenhuma tarefa concluída ainda.',
+    };
+    empty.querySelector ? (empty.querySelector('div + *') || empty).textContent = '' : null;
+    empty.innerHTML = `<div class="links-empty-icon">✅</div>${msgs[statusTab]}`;
     empty.classList.remove('hidden');
+    grid.innerHTML = '';
     return;
   }
   empty.classList.add('hidden');
 
-  const hoje     = new Date().toISOString().slice(0, 10);
-  const amanha   = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  grid.innerHTML = lista.map(t => {
+    const vencendo = t.prazo && t.prazo <= amanha && t.status !== 'concluida';
+    const vencido  = t.prazo && t.prazo < hoje    && t.status !== 'concluida';
 
-  list.innerHTML = items.map(t => {
-    const priorCls  = t.prioridade === 'alta' ? 'tarefa-alta' : t.prioridade === 'media' ? 'tarefa-media' : 'tarefa-baixa';
-    const statusCls = t.status === 'concluida' ? 'tarefa-concluida' : t.status === 'andamento' ? 'tarefa-andamento' : '';
-    const vencendo  = t.prazo && t.prazo <= amanha && t.status !== 'concluida';
-    const vencido   = t.prazo && t.prazo < hoje    && t.status !== 'concluida';
+    const priorIcon = t.prioridade === 'alta' ? '🔴' : t.prioridade === 'media' ? '🟡' : '🟢';
+
+    let tipoLabel = '';
+    if (t.tipo === 'diaria')  tipoLabel = '<span class="tarefa-badge-diaria">🔄 Diária</span>';
+    if (t.tipo === 'semanal' && Array.isArray(t.dias_semana)) {
+      const nomes = t.dias_semana.sort().map(d => DIAS_NOMES[d]).join(', ');
+      tipoLabel = `<span class="tarefa-badge-diaria">📆 ${nomes}</span>`;
+    }
+
+    const statusNext = t.status === 'pendente' ? 'andamento'
+                     : t.status === 'andamento' ? 'concluida'
+                     : 'pendente';
+    const statusLabel = t.status === 'pendente'  ? '⏳ Pendente'
+                      : t.status === 'andamento' ? '🔵 Em andamento'
+                      : '✅ Concluída';
 
     return `
-      <div class="tarefa-card ${statusCls} ${vencido ? 'tarefa-vencida' : vencendo ? 'tarefa-vencendo' : ''}" onclick="abrirTarefa('${t.id}')">
-        <div class="tarefa-header">
-          <div class="tarefa-titulo-wrap">
-            <span class="tarefa-prior-dot ${priorCls}"></span>
-            <span class="tarefa-titulo">${escapeHtml(t.titulo)}</span>
-          </div>
-          <div class="tarefa-badges">
-            ${t.resetar_diario ? '<span class="tarefa-badge-diaria">🔄 Diária</span>' : ''}
-            ${vencido   ? '<span class="tarefa-badge-vencida">⚠️ Vencida</span>'    : ''}
-            ${vencendo  ? '<span class="tarefa-badge-vencendo">⏰ Hoje/Amanhã</span>' : ''}
-            <span class="tarefa-status-badge tarefa-status-${t.status}">${t.status === 'pendente' ? 'Pendente' : t.status === 'andamento' ? 'Em andamento' : 'Concluída'}</span>
-          </div>
-        </div>
-        <div class="tarefa-meta">
-          <span>👤 ${escapeHtml(t.atribuido_para_nome || '—')}</span>
-          ${t.prazo ? `<span>📅 ${formatDate(t.prazo)}</span>` : ''}
-          <span>📝 ${escapeHtml(t.criado_por_nome || '—')}</span>
+      <div class="tarefa-card ${vencido ? 'tarefa-vencida' : vencendo ? 'tarefa-vencendo' : ''}" onclick="abrirTarefaModal('${t.id}')">
+        <div class="tarefa-card-header">
+          <div class="tarefa-titulo">${escapeHtml(t.titulo)}</div>
+          <span class="tarefa-prioridade ${t.prioridade}">${priorIcon}</span>
         </div>
         ${t.descricao ? `<p class="tarefa-desc">${escapeHtml(t.descricao)}</p>` : ''}
+        <div class="tarefa-meta">
+          ${tipoLabel}
+          ${t.prazo ? `<span>📅 ${formatDate(t.prazo)}</span>` : ''}
+          <span>👤 ${escapeHtml(t.atribuido_para_nome || '—')}</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px" onclick="event.stopPropagation()">
+          <button class="mini tarefa-status-btn ${t.status}" onclick="avancarStatus('${t.id}','${statusNext}')" style="flex:1;justify-content:center">
+            ${t.status === 'concluida' ? '↩ Reabrir' : t.status === 'andamento' ? '✅ Concluir' : '▶ Iniciar'}
+          </button>
+        </div>
       </div>
     `;
   }).join('');
 }
 
-// ── Cria tarefa ──
-function togglePrazo() {
-  const tipo   = document.getElementById('tipoTarefa').value;
-  const prazoW = document.getElementById('prazoWrap');
-  if (prazoW) prazoW.style.display = tipo === 'prazo' ? 'block' : 'none';
+// ── Avança status ──
+async function avancarStatus(id, novoStatus) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  try {
+    await sbFetch(`tarefas?id=eq.${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: novoStatus,
+        ultimo_reset: novoStatus === 'concluida' ? hoje : undefined,
+      })
+    });
+    const t = allTarefas.find(t => t.id === id);
+    if (t) t.status = novoStatus;
+    renderTarefas();
+  } catch(e) { console.error(e); }
 }
 
-async function handleCreate(e) {
+// ── Carrega select de usuários ──
+async function loadUsuariosSelect() {
+  try {
+    const users = await dbGetUsuarios();
+    const user  = getSessionUser();
+    const sel   = document.getElementById('atribuidoPara');
+    sel.innerHTML = (users || []).map(u =>
+      `<option value="${u.id}" data-nome="${escapeHtml(u.nome)}" ${u.id === user.id ? 'selected' : ''}>${escapeHtml(u.nome)}${u.id === user.id ? ' (eu)' : ''}</option>`
+    ).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── Cria tarefa ──
+async function handleCriarTarefa(e) {
   e.preventDefault();
-  const user     = getSessionUser();
-  const selEl    = document.getElementById('atribuidoPara');
-  const selOpt   = selEl.options[selEl.selectedIndex];
-  const tipo     = document.getElementById('tipoTarefa').value;
+  const user    = getSessionUser();
+  const tipo    = document.getElementById('tipoTarefa').value;
+  const sel     = document.getElementById('atribuidoPara');
+  const selOpt  = sel.options[sel.selectedIndex];
+
+  let diasSemana = null;
+  if (tipo === 'semanal') {
+    const checked = [...document.querySelectorAll('#diasSemanaPicker input:checked')];
+    diasSemana = checked.map(c => parseInt(c.value));
+    if (!diasSemana.length) { showMsg('Selecione ao menos 1 dia da semana.', 'error'); return; }
+  }
 
   const data = {
     titulo:              document.getElementById('tituloTarefa').value.trim(),
@@ -148,119 +206,100 @@ async function handleCreate(e) {
     status:              'pendente',
     prazo:               tipo === 'prazo' ? (document.getElementById('prazoTarefa').value || null) : null,
     resetar_diario:      tipo === 'diaria',
-    ultimo_reset:        tipo === 'diaria' ? new Date().toISOString().slice(0, 10) : null,
+    dias_semana:         diasSemana,
+    ultimo_reset:        (tipo === 'diaria' || tipo === 'semanal') ? new Date().toISOString().slice(0, 10) : null,
     empresa:             getEmpresaAtiva(),
     criado_por:          user.id,
     criado_por_nome:     user.nome,
-    atribuido_para:      selEl.value,
-    atribuido_para_nome: selOpt?.dataset?.nome || selOpt?.text || '',
+    atribuido_para:      sel.value,
+    atribuido_para_nome: selOpt?.dataset.nome || '',
   };
 
+  if (!data.titulo) { showMsg('Título é obrigatório.', 'error'); return; }
+
   try {
-    await dbCreateTarefa(data);
+    await sbFetch('tarefas', { method: 'POST', body: JSON.stringify(data) });
     document.getElementById('formTarefa').reset();
-    togglePrazo();
+    toggleTipoFields();
     showMsg('Tarefa criada!', 'ok');
     await loadTarefas();
   } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
 }
 
-// ── Modal tarefa ──
-async function abrirTarefa(id) {
-  tarefaAberta = allTarefas.find(t => t.id === id);
-  if (!tarefaAberta) return;
+// ── Modal de tarefa ──
+let modalTarefaId = null;
 
-  const t       = tarefaAberta;
-  const user    = getSessionUser();
-  const isAdm   = isAdmin();
-  const overlay = document.getElementById('tarefaModal');
+function abrirTarefaModal(id) {
+  const t = allTarefas.find(t => t.id === id);
+  if (!t) return;
+  modalTarefaId = id;
 
-  document.getElementById('modalTituloTarefa').textContent   = t.titulo;
-  document.getElementById('modalDescTarefa').textContent     = t.descricao || 'Sem descrição.';
-  document.getElementById('modalAtribuidoPara').textContent  = t.atribuido_para_nome || '—';
-  document.getElementById('modalCriadoPor').textContent      = t.criado_por_nome || '—';
-  document.getElementById('modalPrazo').textContent          = t.prazo ? formatDate(t.prazo) : '—';
-  document.getElementById('modalTipo').textContent           = t.resetar_diario ? '🔄 Diária' : '📅 Com prazo';
-  document.getElementById('modalPrioridade').textContent     = t.prioridade === 'alta' ? '🔴 Alta' : t.prioridade === 'media' ? '🟡 Média' : '🟢 Baixa';
+  document.getElementById('modalTituloTarefa').textContent     = t.titulo;
+  document.getElementById('modalDescTarefa').textContent       = t.descricao || '—';
+  document.getElementById('modalAtribuidoPara').textContent    = t.atribuido_para_nome || '—';
+  document.getElementById('modalCriadoPor').textContent        = t.criado_por_nome || '—';
+  document.getElementById('modalPrazo').textContent            = t.prazo ? formatDate(t.prazo) : '—';
+  document.getElementById('modalPrioridade').textContent       = t.prioridade || '—';
 
-  // Status select
-  const statusSel = document.getElementById('modalStatus');
-  statusSel.value = t.status;
+  let tipoTxt = t.tipo === 'diaria' ? '🔄 Diária'
+              : t.tipo === 'semanal' && Array.isArray(t.dias_semana)
+                ? `📆 Semanal (${t.dias_semana.sort().map(d => DIAS_NOMES[d]).join(', ')})`
+              : '📅 Com prazo';
+  document.getElementById('modalTipo').textContent = tipoTxt;
 
-  // Botões admin
-  document.getElementById('btnDeleteTarefa').style.display = isAdm ? 'block' : 'none';
-
-  // Comentários
-  await loadComentarios(id);
-
-  overlay.classList.remove('hidden');
+  loadComentarios(id);
+  document.getElementById('tarefaModal').classList.remove('hidden');
 }
 
 function fecharTarefaModal() {
   document.getElementById('tarefaModal').classList.add('hidden');
-  tarefaAberta = null;
+  modalTarefaId = null;
 }
 
-async function salvarStatusTarefa() {
-  if (!tarefaAberta) return;
-  const status = document.getElementById('modalStatus').value;
-  try {
-    await dbUpdateTarefa(tarefaAberta.id, { status });
-    showMsg('Status atualizado!', 'ok');
-    fecharTarefaModal();
-    await loadTarefas();
-  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
-}
-
-async function deletarTarefa() {
-  if (!tarefaAberta || !confirm('Remover esta tarefa?')) return;
-  try {
-    await dbDeleteTarefa(tarefaAberta.id);
-    fecharTarefaModal();
-    await loadTarefas();
-  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
-}
-
-// ── Comentários ──
 async function loadComentarios(tarefaId) {
+  const list = document.getElementById('comentariosList');
+  list.innerHTML = '<p style="color:var(--muted);font-size:12px">Carregando...</p>';
   try {
-    const comentarios = await dbGetComentarios(tarefaId) || [];
-    const list = document.getElementById('comentariosList');
-    list.innerHTML = comentarios.length
-      ? comentarios.map(c => `
-          <div class="comentario">
-            <div class="comentario-header">
-              <strong>${escapeHtml(c.usuario_nome || '—')}</strong>
-              <span class="comentario-data">${formatDateTime(c.criado_em)}</span>
-            </div>
-            <p class="comentario-texto">${escapeHtml(c.texto)}</p>
-          </div>
-        `).join('')
-      : '<p style="color:var(--muted);font-size:13px">Nenhum comentário ainda.</p>';
+    const rows = await sbFetch(`tarefa_comentarios?tarefa_id=eq.${tarefaId}&order=criado_em.asc`);
+    if (!rows?.length) { list.innerHTML = '<p style="color:var(--muted);font-size:12px">Nenhum comentário ainda.</p>'; return; }
+    list.innerHTML = rows.map(c => `
+      <div class="comentario-item">
+        <div class="comentario-meta">${escapeHtml(c.usuario_nome)} · ${formatDateTime(c.criado_em)}</div>
+        <div class="comentario-texto">${escapeHtml(c.texto)}</div>
+      </div>
+    `).join('');
+  } catch(e) { list.innerHTML = ''; }
+}
+
+async function enviarComentario() {
+  if (!modalTarefaId) return;
+  const input = document.getElementById('comentarioInput');
+  const texto = input.value.trim();
+  if (!texto) return;
+  const user = getSessionUser();
+  try {
+    await sbFetch('tarefa_comentarios', { method: 'POST', body: JSON.stringify({
+      tarefa_id: modalTarefaId,
+      usuario_id: user.id,
+      usuario_nome: user.nome,
+      texto,
+    })});
+    input.value = '';
+    loadComentarios(modalTarefaId);
   } catch(e) { console.error(e); }
 }
 
-async function handleComentario(e) {
-  e.preventDefault();
-  if (!tarefaAberta) return;
-  const user  = getSessionUser();
-  const texto = document.getElementById('textoComentario').value.trim();
-  if (!texto) return;
+async function deletarTarefa(id) {
+  if (!confirm('Remover esta tarefa?')) return;
   try {
-    await dbCreateComentario({
-      tarefa_id:    tarefaAberta.id,
-      usuario_id:   user.id,
-      usuario_nome: user.nome,
-      texto,
-    });
-    document.getElementById('textoComentario').value = '';
-    await loadComentarios(tarefaAberta.id);
-  } catch(e) { showMsg('Erro: ' + e.message, 'error'); }
+    await sbFetch(`tarefas?id=eq.${id}`, { method: 'DELETE', prefer: '' });
+    fecharTarefaModal();
+    await loadTarefas();
+  } catch(e) { console.error(e); }
 }
 
 function showMsg(text, type) {
   const el = document.getElementById('formMsg');
-  if (!el) return;
   el.textContent = text;
   el.className = `message ${type}`;
   setTimeout(() => { el.textContent = ''; el.className = 'message'; }, 3000);

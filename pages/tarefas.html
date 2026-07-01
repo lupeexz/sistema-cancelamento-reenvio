@@ -113,6 +113,7 @@
             <span>Tipo</span>
             <select id="tipoTarefa">
               <option value="diaria">🔄 Diária (reseta todo dia)</option>
+              <option value="semanal">📆 Semanal (dias da semana)</option>
               <option value="prazo">📅 Com prazo</option>
             </select>
           </label>
@@ -128,6 +129,18 @@
             <span>Prazo</span>
             <input id="prazoTarefa" type="date"/>
           </label>
+          <label class="field" id="diasSemanaWrap" style="display:none;grid-column:1/-1">
+            <span>Dias da semana (máx. 3)</span>
+            <div class="dias-semana-picker" id="diasSemanaPicker">
+              <label class="dia-btn"><input type="checkbox" value="0"> Dom</label>
+              <label class="dia-btn"><input type="checkbox" value="1"> Seg</label>
+              <label class="dia-btn"><input type="checkbox" value="2"> Ter</label>
+              <label class="dia-btn"><input type="checkbox" value="3"> Qua</label>
+              <label class="dia-btn"><input type="checkbox" value="4"> Qui</label>
+              <label class="dia-btn"><input type="checkbox" value="5"> Sex</label>
+              <label class="dia-btn"><input type="checkbox" value="6"> Sáb</label>
+            </div>
+          </label>
           <label class="field">
             <span>Atribuir para</span>
             <select id="atribuidoPara"></select>
@@ -140,9 +153,18 @@
       </div>
     </details>
 
-    <!-- FILTROS -->
-    <div class="card toolbar" style="margin-bottom:16px">
-      <label class="field">
+    <!-- ABAS DE STATUS -->
+    <div class="tarefa-tabs" id="tarefaTabs">
+      <button class="tarefa-tab active" onclick="setTabStatus('pendente')" id="tabPendente">
+        ⏳ Pendente <span class="tarefa-tab-count" id="countPendente">0</span>
+      </button>
+      <button class="tarefa-tab" onclick="setTabStatus('andamento')" id="tabAndamento">
+        🔵 Em andamento <span class="tarefa-tab-count" id="countAndamento">0</span>
+      </button>
+      <button class="tarefa-tab" onclick="setTabStatus('concluida')" id="tabConcluida">
+        ✅ Concluídas <span class="tarefa-tab-count" id="countConcluida">0</span>
+      </button>
+    </div>
         <span>Status</span>
         <select id="filterStatus">
           <option value="">Todos</option>
@@ -150,16 +172,6 @@
           <option value="andamento">Em andamento</option>
           <option value="concluida">Concluída</option>
         </select>
-      </label>
-      <label class="field">
-        <span>Prioridade</span>
-        <select id="filterPrior">
-          <option value="">Todas</option>
-          <option value="alta">Alta</option>
-          <option value="media">Média</option>
-          <option value="baixa">Baixa</option>
-        </select>
-      </label>
     </div>
 
     <!-- LISTA -->

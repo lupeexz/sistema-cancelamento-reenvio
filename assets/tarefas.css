@@ -202,3 +202,127 @@
 .cliente-obs { font-size: 12px; color: var(--text2); line-height: 1.5; margin: 0; }
 
 .cliente-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+/* ── Abas de tarefa ── */
+.tarefa-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--stroke);
+  padding-bottom: 0;
+}
+
+.tarefa-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  margin-bottom: -1px;
+  box-shadow: none;
+}
+.tarefa-tab:hover { color: var(--text2); filter: none; transform: none; }
+.tarefa-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+.tarefa-tab-count {
+  background: var(--panel-2);
+  border: 1px solid var(--stroke-2);
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+.tarefa-tab.active .tarefa-tab-count {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+}
+
+/* ── Seletor de dias da semana ── */
+.dias-semana-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.dia-btn {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+}
+
+.dia-btn input[type="checkbox"] { display: none; }
+
+.dia-btn span, .dia-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dia-btn input[type="checkbox"] + * ,
+.dia-btn:has(input) {
+  width: 42px;
+  height: 36px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--stroke-2);
+  background: var(--panel-2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dia-btn:has(input:checked) {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+}
+
+/* ── Badge semanal ── */
+.tarefa-badge-diaria {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-dim);
+  color: var(--brand);
+  border: 1px solid var(--brand-border);
+}
+
+/* ── Card vencida / vencendo ── */
+.tarefa-card.tarefa-vencida  { border-color: rgba(239,68,68,.4); }
+.tarefa-card.tarefa-vencendo { border-color: rgba(245,158,11,.4); }
+
+/* ── Botão de status inline ── */
+.tarefa-status-btn {
+  border: 1px solid var(--stroke-2);
+  background: var(--panel-2);
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all .12s;
+}
+.tarefa-status-btn:hover { background: var(--panel-3); filter: none; transform: none; }

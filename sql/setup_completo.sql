@@ -291,3 +291,7 @@ alter table clientes_pendentes enable row level security;
 
 drop policy if exists "allow_all_clientes_pendentes" on clientes_pendentes;
 create policy "allow_all_clientes_pendentes" on clientes_pendentes for all using (true) with check (true);
+
+-- ── TAREFA SEMANAL: adiciona coluna de dias da semana ──
+alter table tarefas add column if not exists dias_semana integer[] default null;
+-- dias_semana: array de inteiros 0-6 (0=dom, 1=seg, 2=ter, 3=qua, 4=qui, 5=sex, 6=sab)
